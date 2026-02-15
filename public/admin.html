@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitcoin Agentic Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* ================================================================
+       RESET & BASE
+       ================================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #root { height: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F0F2F5;
+      color: #1A1A2E;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ================================================================
+       VARIABLES
+       ================================================================ */
+    :root {
+      --orange: #F7931A;
+      --orange-hover: #E8850F;
+      --navy: #0D1B2A;
+      --navy-light: #1B2838;
+      --white: #FFFFFF;
+      --green: #10B981;
+      --green-bg: #D1FAE5;
+      --red: #EF4444;
+      --red-bg: #FEE2E2;
+      --gray: #6B7280;
+      --gray-light: #9CA3AF;
+      --gray-lighter: #E5E7EB;
+      --gray-lightest: #F9FAFB;
+      --blue: #3B82F6;
+      --blue-bg: #DBEAFE;
+      --yellow: #F59E0B;
+      --yellow-bg: #FEF3C7;
+      --sidebar-w: 240px;
+      --topbar-h: 56px;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    /* ================================================================
+       SCROLLBAR
+       ================================================================ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--gray-light); border-radius: 3px; }
+
+    /* ================================================================
+       LAYOUT
+       ================================================================ */
+    .app-layout { display: flex; height: 100vh; overflow: hidden; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 100;
+      transition: transform 0.25s ease;
+    }
+    .sidebar-brand {
+      height: var(--topbar-h);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-brand svg { width: 28px; height: 28px; margin-right: 10px; flex-shrink: 0; }
+    .sidebar-brand span { color: var(--white); font-weight: 700; font-size: 15px; white-space: nowrap; }
+    .sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: rgba(255,255,255,0.6);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+    .sidebar-nav-item.active { color: var(--white); background: var(--orange); }
+    .sidebar-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-footer button {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 8px 12px; border-radius: 6px;
+      color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; background: none; transition: all 0.15s;
+    }
+    .sidebar-footer button:hover { color: var(--red); background: rgba(239,68,68,0.1); }
+
+    /* MAIN CONTENT */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* TOPBAR */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-lighter);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      color: var(--navy); padding: 4px;
+    }
+    .topbar-title { font-size: 16px; font-weight: 600; color: var(--navy); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-admin-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--orange); color: var(--white);
+      font-size: 12px; font-weight: 600;
+    }
+    .topbar-admin-badge svg { width: 14px; height: 14px; }
+
+    /* CONTENT SCROLL */
+    .content-scroll { flex: 1; overflow-y: auto; padding: 24px; }
+
+    /* ================================================================
+       CARDS & STAT BOXES
+       ================================================================ */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-card-label { font-size: 13px; color: var(--gray); font-weight: 500; margin-bottom: 4px; }
+    .stat-card-value { font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1.2; }
+    .stat-card-sub { font-size: 12px; color: var(--gray-light); margin-top: 4px; }
+    .stat-card-trend-up { color: var(--green); }
+    .stat-card-trend-down { color: var(--red); }
+
+    /* ================================================================
+       CARD / PANEL
+       ================================================================ */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-lighter);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-header h3 { font-size: 15px; font-weight: 600; color: var(--navy); }
+    .card-body { padding: 0; }
+
+    /* ================================================================
+       TABLE
+       ================================================================ */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead { background: var(--gray-lightest); }
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gray);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--navy); }
+    th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+    th .sort-arrow.active { opacity: 1; color: var(--orange); }
+    td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--gray-lighter);
+      color: var(--navy);
+      white-space: nowrap;
+    }
+    tr:hover td { background: var(--gray-lightest); }
+    tr:last-child td { border-bottom: none; }
+
+    /* ================================================================
+       BADGES
+       ================================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .badge-green { background: var(--green-bg); color: #065F46; }
+    .badge-yellow { background: var(--yellow-bg); color: #92400E; }
+    .badge-red { background: var(--red-bg); color: #991B1B; }
+    .badge-blue { background: var(--blue-bg); color: #1E40AF; }
+    .badge-gray { background: var(--gray-lighter); color: var(--gray); }
+
+    /* ================================================================
+       BUTTONS
+       ================================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--orange); color: var(--white); }
+    .btn-primary:hover:not(:disabled) { background: var(--orange-hover); }
+    .btn-outline { background: var(--white); color: var(--navy); border-color: var(--gray-lighter); }
+    .btn-outline:hover:not(:disabled) { background: var(--gray-lightest); border-color: var(--gray-light); }
+    .btn-danger { background: var(--red); color: var(--white); }
+    .btn-danger:hover:not(:disabled) { background: #DC2626; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px; border-radius: 6px; background: none; border: 1px solid var(--gray-lighter); cursor: pointer; color: var(--gray); transition: all 0.15s; }
+    .btn-icon:hover { color: var(--navy); border-color: var(--gray-light); background: var(--gray-lightest); }
+
+    /* ================================================================
+       FORM ELEMENTS
+       ================================================================ */
+    .input, .select {
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--gray-lighter);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--navy);
+      background: var(--white);
+      transition: border-color 0.15s;
+    }
+    .input:focus, .select:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(247,147,26,0.1); }
+    .input::placeholder { color: var(--gray-light); }
+    .select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236B7280'%3e%3cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3e%3c/svg%3e"); background-position: right 8px center; background-repeat: no-repeat; background-size: 16px; padding-right: 32px; cursor: pointer; }
+    .textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--gray-lighter); border-radius: 6px;
+      font-size: 13px; font-family: inherit; color: var(--navy); resize: vertical; min-height: 60px;
+    }
+    .textarea:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(247,147,26,0.1); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--gray); margin-bottom: 4px; }
+
+    /* ================================================================
+       TOOLBAR
+       ================================================================ */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-lighter);
+    }
+    .toolbar .input { width: 280px; }
+    .toolbar .select { min-width: 130px; }
+
+    /* ================================================================
+       MODAL
+       ================================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(13,27,42,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 500;
+      animation: fadeIn 0.15s ease;
+    }
+    .modal {
+      background: var(--white);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 640px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.2s ease;
+    }
+    .modal-lg { max-width: 800px; }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-lighter);
+      position: sticky; top: 0; background: var(--white); z-index: 1;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 600; color: var(--navy); }
+    .modal-close {
+      background: none; border: none; cursor: pointer; color: var(--gray); font-size: 20px;
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; transition: all 0.15s;
+    }
+    .modal-close:hover { background: var(--gray-lightest); color: var(--navy); }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--gray-lighter);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* ================================================================
+       TOAST
+       ================================================================ */
+    .toast-container {
+      position: fixed; top: 16px; right: 16px; z-index: 1000;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: var(--white);
+      box-shadow: var(--shadow-lg);
+      font-size: 13px; font-weight: 500;
+      animation: slideIn 0.2s ease;
+      min-width: 280px;
+    }
+    .toast-success { border-left: 4px solid var(--green); }
+    .toast-error { border-left: 4px solid var(--red); }
+    .toast-info { border-left: 4px solid var(--blue); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ================================================================
+       SPINNER
+       ================================================================ */
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--gray-lighter);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    .spinner-sm { width: 16px; height: 16px; border-width: 2px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-center { display: flex; align-items: center; justify-content: center; padding: 60px 0; }
+
+    /* ================================================================
+       EMPTY STATE
+       ================================================================ */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 20px; color: var(--gray);
+    }
+    .empty-state svg { width: 48px; height: 48px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-state p { font-size: 14px; }
+
+    /* ================================================================
+       BAR CHART (CSS)
+       ================================================================ */
+    .bar-chart { padding: 20px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .bar-label { width: 80px; font-size: 13px; font-weight: 500; color: var(--gray); text-align: right; }
+    .bar-track { flex: 1; height: 28px; background: var(--gray-lightest); border-radius: 4px; overflow: hidden; position: relative; }
+    .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; color: var(--white); min-width: 40px; transition: width 0.5s ease; }
+    .bar-fill-orange { background: var(--orange); }
+    .bar-fill-navy { background: var(--navy-light); }
+    .bar-count { width: 40px; font-size: 13px; font-weight: 600; color: var(--navy); text-align: right; }
+
+    /* ================================================================
+       DETAIL SECTIONS (view modal)
+       ================================================================ */
+    .detail-section { margin-bottom: 20px; }
+    .detail-section h4 {
+      font-size: 13px; font-weight: 600; color: var(--gray);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      margin-bottom: 10px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--gray-lighter);
+    }
+    .detail-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;
+    }
+    .detail-item label { font-size: 12px; color: var(--gray-light); }
+    .detail-item p { font-size: 14px; color: var(--navy); font-weight: 500; word-break: break-all; }
+    .detail-mini-table { font-size: 12px; }
+    .detail-mini-table td { padding: 6px 10px; }
+
+    /* ================================================================
+       LOGIN SCREEN
+       ================================================================ */
+    .login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--navy) 0%, #162A3E 100%);
+    }
+    .login-box {
+      background: var(--white); border-radius: 12px; padding: 40px;
+      width: 100%; max-width: 400px; box-shadow: var(--shadow-lg);
+    }
+    .login-logo { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px; }
+    .login-logo svg { width: 36px; height: 36px; }
+    .login-logo span { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .login-box .form-group .input { width: 100%; height: 42px; font-size: 14px; }
+    .login-box .btn { width: 100%; height: 42px; justify-content: center; font-size: 14px; }
+    .login-error { background: var(--red-bg); color: #991B1B; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
+
+    /* ================================================================
+       SATS AMOUNT COLORS
+       ================================================================ */
+    .sats-positive { color: var(--green); font-weight: 600; }
+    .sats-negative { color: var(--red); font-weight: 600; }
+
+    /* ================================================================
+       CONFIRM DIALOG
+       ================================================================ */
+    .confirm-dialog {
+      text-align: center;
+      padding: 24px;
+    }
+    .confirm-dialog svg { width: 48px; height: 48px; color: var(--red); margin-bottom: 12px; }
+    .confirm-dialog h3 { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+    .confirm-dialog p { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
+    .confirm-dialog .btn-group { display: flex; gap: 10px; justify-content: center; }
+
+    /* ================================================================
+       RESPONSIVE
+       ================================================================ */
+    @media (max-width: 1024px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0;
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99;
+      }
+      .topbar-hamburger { display: block; }
+      .content-scroll { padding: 16px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-card-value { font-size: 20px; }
+      .toolbar { padding: 12px 16px; }
+      .toolbar .input { width: 100%; }
+      .detail-grid { grid-template-columns: 1fr; }
+      /* responsive table cards */
+      .mobile-cards table, .mobile-cards thead { display: none; }
+      .mobile-cards .table-card-list { display: block; }
+      .table-card {
+        background: var(--white); border-radius: var(--radius);
+        padding: 14px; margin-bottom: 10px; border: 1px solid var(--gray-lighter);
+      }
+      .table-card-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+      .table-card-row .tcr-label { color: var(--gray); font-weight: 500; }
+      .table-card-row .tcr-value { font-weight: 500; color: var(--navy); text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+    }
+
+    @media (max-width: 480px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .login-box { margin: 16px; padding: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    /* ====================================================================
+       Bitcoin Agentic Admin Panel — React 18 SPA
+       ==================================================================== */
+
+    const { useState, useEffect, useCallback, useRef, createContext, useContext, useMemo } = React;
+
+    // =====================================================================
+    // CONSTANTS
+    // =====================================================================
+    const API_BASE = 'api';
+
+    // =====================================================================
+    // HELPERS
+    // =====================================================================
+    function fmtSats(n) {
+      if (n == null) return '0';
+      return Number(n).toLocaleString('en-US');
+    }
+    function fmtUSD(cents) {
+      return '$' + (Number(cents) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtUSDDollars(dollars) {
+      return '$' + Number(dollars).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtDate(iso) {
+      if (!iso) return '--';
+      try {
+        return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch { return iso; }
+    }
+    function fmtDateTime(iso) {
+      if (!iso) return '--';
+      try {
+        return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      } catch { return iso; }
+    }
+    function fmtDataUsed(mb) {
+      if (!mb) return '0 MB';
+      if (mb >= 1024) return (mb / 1024).toFixed(1) + ' GB';
+      return mb + ' MB';
+    }
+    function truncate(str, len) {
+      if (!str) return '--';
+      if (str.length <= len) return str;
+      return str.slice(0, len) + '...';
+    }
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    // =====================================================================
+    // ICONS (inline SVGs)
+    // =====================================================================
+    function IconBitcoin() {
+      return (
+        <svg viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="#F7931A"/>
+          <path d="M22.5 14.2c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.6-2.6-1.6-.4-.7 2.7c-.3-.1-.7-.2-1-.3l-2.2-.6-.4 1.7s1.2.3 1.2.3c.6.2.8.6.7 1l-.7 2.9c0 0 .1 0 .1 0l-.1 0-1 4c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.1.5c.4.1.8.2 1.2.3l-.7 2.7 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.6.4.7-2.7c2.8.5 4.9.3 5.8-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.4zm-3.7 5.2c-.5 2-4 .9-5.1.7l.9-3.7c1.1.3 4.7.8 4.2 3zm.5-5.3c-.5 1.8-3.3.9-4.3.7l.8-3.3c1 .2 4 .7 3.5 2.6z" fill="white"/>
+        </svg>
+      );
+    }
+    function IconDashboard() { return <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zm10 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>; }
+    function IconUsers() { return <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zm8 0a3 3 0 11-6 0 3 3 0 016 0zm-4.07 11c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>; }
+    function IconTransactions() { return <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd"/></svg>; }
+    function IconReferrals() { return <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zm5 2a2 2 0 11-4 0 2 2 0 014 0zm-4 7a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zm10 10v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>; }
+    function IconInvoices() { return <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"/></svg>; }
+    function IconWithdrawals() { return <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 1a1 1 0 100 2 1 1 0 000-2z"/></svg>; }
+    function IconLogout() { return <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd"/></svg>; }
+    function IconHamburger() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="24" height="24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>; }
+    function IconClose() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><path d="M6 18L18 6M6 6l12 12"/></svg>; }
+    function IconShield() { return <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>; }
+    function IconWarning() { return <svg viewBox="0 0 20 20" fill="currentColor" width="48" height="48"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/></svg>; }
+    function IconSearch() { return <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/></svg>; }
+    function IconEmpty() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>; }
+
+    // =====================================================================
+    // TOAST SYSTEM
+    // =====================================================================
+    const ToastContext = createContext();
+
+    function ToastProvider({ children }) {
+      const [toasts, setToasts] = useState([]);
+      const counterRef = useRef(0);
+
+      const addToast = useCallback((message, type = 'success') => {
+        const id = ++counterRef.current;
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+      }, []);
+
+      return (
+        <ToastContext.Provider value={addToast}>
+          {children}
+          <div className="toast-container">
+            {toasts.map(t => (
+              <div key={t.id} className={`toast toast-${t.type}`}>{t.message}</div>
+            ))}
+          </div>
+        </ToastContext.Provider>
+      );
+    }
+
+    function useToast() { return useContext(ToastContext); }
+
+    // =====================================================================
+    // API HELPER
+    // =====================================================================
+    function getToken() { return localStorage.getItem('ba_admin_token'); }
+    function setToken(t) { localStorage.setItem('ba_admin_token', t); }
+    function clearToken() { localStorage.removeItem('ba_admin_token'); }
+
+    async function apiFetch(path, opts = {}) {
+      const token = getToken();
+      const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`${API_BASE}/${path}`, { ...opts, headers });
+      if (res.status === 401) {
+        clearToken();
+        window.location.reload();
+        throw new Error('Session expired');
+      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    }
+
+    // =====================================================================
+    // STATUS BADGE
+    // =====================================================================
+    function StatusBadge({ status }) {
+      const map = {
+        active: 'badge-green', paid: 'badge-green', completed: 'badge-green', qualified: 'badge-green',
+        pending: 'badge-yellow', processing: 'badge-blue',
+        inactive: 'badge-gray', cancelled: 'badge-gray', none: 'badge-gray',
+        suspended: 'badge-red', failed: 'badge-red',
+      };
+      const cls = map[(status || '').toLowerCase()] || 'badge-gray';
+      return <span className={`badge ${cls}`}>{status || 'unknown'}</span>;
+    }
+
+    // =====================================================================
+    // PLAN BADGE
+    // =====================================================================
+    function PlanBadge({ plan }) {
+      if (!plan || plan === 'none') return <span className="badge badge-gray">None</span>;
+      if (plan === 'pro') return <span className="badge badge-blue">Pro</span>;
+      return <span className="badge badge-green">Basic</span>;
+    }
+
+    // =====================================================================
+    // SORTABLE TABLE HEADER
+    // =====================================================================
+    function SortTh({ label, field, sort, setSort }) {
+      const active = sort.field === field;
+      const dir = active ? sort.dir : null;
+      function handleClick() {
+        if (active) {
+          setSort({ field, dir: dir === 'asc' ? 'desc' : 'asc' });
+        } else {
+          setSort({ field, dir: 'asc' });
+        }
+      }
+      return (
+        <th onClick={handleClick}>
+          {label}
+          <span className={`sort-arrow ${active ? 'active' : ''}`}>
+            {active ? (dir === 'asc' ? ' \u2191' : ' \u2193') : ' \u2195'}
+          </span>
+        </th>
+      );
+    }
+
+    function sortData(data, sort) {
+      if (!sort.field) return data;
+      return [...data].sort((a, b) => {
+        let va = a[sort.field];
+        let vb = b[sort.field];
+        if (va == null) va = '';
+        if (vb == null) vb = '';
+        if (typeof va === 'number' && typeof vb === 'number') {
+          return sort.dir === 'asc' ? va - vb : vb - va;
+        }
+        const sa = String(va).toLowerCase();
+        const sb = String(vb).toLowerCase();
+        if (sa < sb) return sort.dir === 'asc' ? -1 : 1;
+        if (sa > sb) return sort.dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // =====================================================================
+    // LOADING / EMPTY
+    // =====================================================================
+    function Loading() {
+      return <div className="loading-center"><div className="spinner"></div></div>;
+    }
+    function EmptyState({ message }) {
+      return (
+        <div className="empty-state">
+          <IconEmpty />
+          <p>{message || 'No data to display'}</p>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // CONFIRM DIALOG
+    // =====================================================================
+    function ConfirmDialog({ title, message, onConfirm, onCancel, loading }) {
+      return (
+        <div className="modal-overlay" onClick={onCancel}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <div className="confirm-dialog">
+              <IconWarning />
+              <h3>{title}</h3>
+              <p>{message}</p>
+              <div className="btn-group">
+                <button className="btn btn-outline" onClick={onCancel} disabled={loading}>Cancel</button>
+                <button className="btn btn-danger" onClick={onConfirm} disabled={loading}>
+                  {loading ? <><div className="spinner spinner-sm"></div> Deleting...</> : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // LOGIN SCREEN
+    // =====================================================================
+    function LoginScreen({ onLogin }) {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+          const data = await apiFetch('auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+          });
+          if (data.user && data.user.role !== 'admin') {
+            setError('Access denied. Admin credentials required.');
+            setLoading(false);
+            return;
+          }
+          setToken(data.token);
+          onLogin(data.user);
+        } catch (err) {
+          setError(err.message || 'Login failed');
+        }
+        setLoading(false);
+      }
+
+      return (
+        <div className="login-screen">
+          <div className="login-box">
+            <div className="login-logo">
+              <IconBitcoin />
+              <span>Bitcoin Agentic Admin</span>
+            </div>
+            {error && <div className="login-error">{error}</div>}
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  className="input"
+                  type="email"
+                  placeholder="admin@bitcoinagentic.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input
+                  className="input"
+                  type="password"
+                  placeholder="Enter password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+                {loading ? <><div className="spinner spinner-sm"></div> Signing in...</> : 'Sign In'}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // DASHBOARD SCREEN
+    // =====================================================================
+    function DashboardScreen() {
+      const [stats, setStats] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch('admin/stats')
+          .then(setStats)
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      if (loading) return <Loading />;
+      if (!stats) return <EmptyState message="Failed to load stats" />;
+
+      const planMap = {};
+      (stats.planBreakdown || []).forEach(p => { planMap[p.plan] = p.count; });
+      const maxPlan = Math.max(planMap.basic || 0, planMap.pro || 0, 1);
+
+      return (
+        <div>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-card-label">Total Customers</div>
+              <div className="stat-card-value">{fmtSats(stats.totalUsers)}</div>
+              <div className="stat-card-sub stat-card-trend-up">Registered users</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Active Subscribers</div>
+              <div className="stat-card-value">{fmtSats(stats.activeUsers)}</div>
+              <div className="stat-card-sub">Basic: {planMap.basic || 0} | Pro: {planMap.pro || 0}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Revenue</div>
+              <div className="stat-card-value">{fmtUSDDollars(stats.totalRevenue)}</div>
+              <div className="stat-card-sub stat-card-trend-up">From paid invoices</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Sats Distributed</div>
+              <div className="stat-card-value">{fmtSats(stats.totalSatsPaid)}</div>
+              <div className="stat-card-sub">All credits</div>
+            </div>
+          </div>
+
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-card-label">Monthly Recurring Revenue</div>
+              <div className="stat-card-value">{fmtUSD(Number(stats.monthlyRecurringRevenue))}</div>
+              <div className="stat-card-sub">Blended avg</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">New Users This Month</div>
+              <div className="stat-card-value">{fmtSats(stats.newUsersThisMonth)}</div>
+              <div className="stat-card-sub stat-card-trend-up">Current month</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Referrals (Qualified)</div>
+              <div className="stat-card-value">{fmtSats(stats.totalReferrals)}</div>
+              <div className="stat-card-sub">Converted referrals</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Withdrawals</div>
+              <div className="stat-card-value">{fmtSats(stats.totalWithdrawals)} sats</div>
+              <div className="stat-card-sub">Completed payouts</div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }} className="dash-bottom-grid">
+            <div className="card">
+              <div className="card-header"><h3>Recent Signups</h3></div>
+              <div className="card-body">
+                {stats.recentSignups && stats.recentSignups.length > 0 ? (
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Plan</th>
+                          <th>Status</th>
+                          <th>Signed Up</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stats.recentSignups.map(u => (
+                          <tr key={u.id}>
+                            <td>{u.name}</td>
+                            <td>{u.email}</td>
+                            <td><PlanBadge plan={u.plan} /></td>
+                            <td><StatusBadge status={u.plan_status} /></td>
+                            <td>{fmtDate(u.created_at)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <EmptyState message="No recent signups" />
+                )}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header"><h3>Plan Distribution</h3></div>
+              <div className="card-body bar-chart">
+                <div className="bar-row">
+                  <div className="bar-label">Basic</div>
+                  <div className="bar-track">
+                    <div className="bar-fill bar-fill-orange" style={{ width: `${((planMap.basic || 0) / maxPlan) * 100}%` }}>
+                      {planMap.basic || 0}
+                    </div>
+                  </div>
+                  <div className="bar-count">{planMap.basic || 0}</div>
+                </div>
+                <div className="bar-row">
+                  <div className="bar-label">Pro</div>
+                  <div className="bar-track">
+                    <div className="bar-fill bar-fill-navy" style={{ width: `${((planMap.pro || 0) / maxPlan) * 100}%` }}>
+                      {planMap.pro || 0}
+                    </div>
+                  </div>
+                  <div className="bar-count">{planMap.pro || 0}</div>
+                </div>
+                <div className="bar-row">
+                  <div className="bar-label">None</div>
+                  <div className="bar-track">
+                    <div className="bar-fill" style={{ width: `${(((stats.totalUsers - stats.activeUsers) || 0) / Math.max(maxPlan, 1)) * 100}%`, background: 'var(--gray-light)' }}>
+                      {(stats.totalUsers - stats.activeUsers) || 0}
+                    </div>
+                  </div>
+                  <div className="bar-count">{(stats.totalUsers - stats.activeUsers) || 0}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <style>{`
+            @media (max-width: 768px) {
+              .dash-bottom-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // CUSTOMERS SCREEN
+    // =====================================================================
+
+    /* ---- View Detail Modal ---- */
+    function UserDetailModal({ userId, onClose }) {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch(`admin/users/${userId}`)
+          .then(setData)
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, [userId]);
+
+      if (loading) return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
+            <Loading />
+          </div>
+        </div>
+      );
+      if (!data) return null;
+
+      const { user, transactions, invoices, referrals, withdrawals } = data;
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Customer Detail</h2>
+              <button className="modal-close" onClick={onClose}><IconClose /></button>
+            </div>
+            <div className="modal-body">
+              {/* Profile */}
+              <div className="detail-section">
+                <h4>Profile</h4>
+                <div className="detail-grid">
+                  <div className="detail-item"><label>Name</label><p>{user.name}</p></div>
+                  <div className="detail-item"><label>Email</label><p>{user.email}</p></div>
+                  <div className="detail-item"><label>Phone</label><p>{user.phone || '--'}</p></div>
+                  <div className="detail-item"><label>Referral Code</label><p>{user.referral_code}</p></div>
+                  <div className="detail-item"><label>Plan</label><p><PlanBadge plan={user.plan} /></p></div>
+                  <div className="detail-item"><label>Plan Status</label><p><StatusBadge status={user.plan_status} /></p></div>
+                  <div className="detail-item"><label>Account Status</label><p><StatusBadge status={user.status} /></p></div>
+                  <div className="detail-item"><label>Sats Balance</label><p>{fmtSats(user.sats_balance)} sats</p></div>
+                  <div className="detail-item"><label>Data Used</label><p>{fmtDataUsed(user.data_used_mb)}</p></div>
+                  <div className="detail-item"><label>eSIM Status</label><p>{user.esim_status || '--'}</p></div>
+                  <div className="detail-item"><label>Joined</label><p>{fmtDateTime(user.created_at)}</p></div>
+                  <div className="detail-item"><label>Last Login</label><p>{fmtDateTime(user.last_login)}</p></div>
+                </div>
+              </div>
+
+              {/* Transactions */}
+              <div className="detail-section">
+                <h4>Sats Transactions (recent 20)</h4>
+                {transactions && transactions.length > 0 ? (
+                  <div className="table-wrap">
+                    <table className="detail-mini-table">
+                      <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th></tr></thead>
+                      <tbody>
+                        {transactions.map(tx => (
+                          <tr key={tx.id}>
+                            <td>{fmtDate(tx.created_at)}</td>
+                            <td>{tx.type}</td>
+                            <td>{tx.description}</td>
+                            <td className={tx.amount >= 0 ? 'sats-positive' : 'sats-negative'}>
+                              {tx.amount >= 0 ? '+' : ''}{fmtSats(tx.amount)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : <EmptyState message="No transactions" />}
+              </div>
+
+              {/* Referrals */}
+              <div className="detail-section">
+                <h4>Referrals</h4>
+                {referrals && referrals.length > 0 ? (
+                  <div className="table-wrap">
+                    <table className="detail-mini-table">
+                      <thead><tr><th>Referred User</th><th>Status</th><th>Sats Earned</th><th>Date</th></tr></thead>
+                      <tbody>
+                        {referrals.map(r => (
+                          <tr key={r.id}>
+                            <td>{r.referred_name || '--'}</td>
+                            <td><StatusBadge status={r.status} /></td>
+                            <td className="sats-positive">+{fmtSats(r.referrer_sats)}</td>
+                            <td>{fmtDate(r.created_at)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : <EmptyState message="No referrals" />}
+              </div>
+
+              {/* Invoices */}
+              <div className="detail-section">
+                <h4>Invoices</h4>
+                {invoices && invoices.length > 0 ? (
+                  <div className="table-wrap">
+                    <table className="detail-mini-table">
+                      <thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th>Period</th></tr></thead>
+                      <tbody>
+                        {invoices.map(inv => (
+                          <tr key={inv.id}>
+                            <td>{fmtDate(inv.created_at)}</td>
+                            <td><PlanBadge plan={inv.plan} /></td>
+                            <td>{fmtUSD(inv.amount_cents)}</td>
+                            <td><StatusBadge status={inv.status} /></td>
+                            <td>{inv.billing_period}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : <EmptyState message="No invoices" />}
+              </div>
+
+              {/* Withdrawals */}
+              <div className="detail-section">
+                <h4>Withdrawals</h4>
+                {withdrawals && withdrawals.length > 0 ? (
+                  <div className="table-wrap">
+                    <table className="detail-mini-table">
+                      <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Status</th><th>TX Hash</th></tr></thead>
+                      <tbody>
+                        {withdrawals.map(w => (
+                          <tr key={w.id}>
+                            <td>{fmtDate(w.created_at)}</td>
+                            <td>{fmtSats(w.amount_sats)} sats</td>
+                            <td>{w.dest_type}</td>
+                            <td><StatusBadge status={w.status} /></td>
+                            <td>{truncate(w.tx_hash, 16)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : <EmptyState message="No withdrawals" />}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ---- Edit Modal ---- */
+    function UserEditModal({ userId, onClose, onSaved }) {
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [saving, setSaving] = useState(false);
+      const [form, setForm] = useState({ status: '', plan: '', plan_status: '', sats_adjustment: '', adjustment_reason: '' });
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch(`admin/users/${userId}`)
+          .then(data => {
+            setUser(data.user);
+            setForm({
+              status: data.user.status || 'active',
+              plan: data.user.plan || 'none',
+              plan_status: data.user.plan_status || 'inactive',
+              sats_adjustment: '',
+              adjustment_reason: '',
+            });
+          })
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, [userId]);
+
+      async function handleSave() {
+        setSaving(true);
+        try {
+          const body = {
+            status: form.status,
+            plan: form.plan,
+            plan_status: form.plan_status,
+          };
+          if (form.sats_adjustment && form.adjustment_reason) {
+            body.sats_adjustment = parseInt(form.sats_adjustment, 10);
+            body.adjustment_reason = form.adjustment_reason;
+          } else if (form.sats_adjustment && !form.adjustment_reason) {
+            toast('Reason is required for sats adjustment', 'error');
+            setSaving(false);
+            return;
+          }
+          await apiFetch(`admin/users/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(body),
+          });
+          toast('User updated successfully', 'success');
+          onSaved();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+        setSaving(false);
+      }
+
+      if (loading) return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}><Loading /></div>
+        </div>
+      );
+      if (!user) return null;
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit Customer</h2>
+              <button className="modal-close" onClick={onClose}><IconClose /></button>
+            </div>
+            <div className="modal-body">
+              <div style={{ marginBottom: 16, padding: '10px 14px', background: 'var(--gray-lightest)', borderRadius: 6 }}>
+                <strong>{user.name}</strong> &mdash; {user.email}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Account Status</label>
+                <select className="select" style={{ width: '100%' }} value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Plan</label>
+                <select className="select" style={{ width: '100%' }} value={form.plan} onChange={e => setForm(f => ({ ...f, plan: e.target.value }))}>
+                  <option value="none">None</option>
+                  <option value="basic">Basic</option>
+                  <option value="pro">Pro</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Plan Status</label>
+                <select className="select" style={{ width: '100%' }} value={form.plan_status} onChange={e => setForm(f => ({ ...f, plan_status: e.target.value }))}>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div style={{ borderTop: '1px solid var(--gray-lighter)', margin: '20px 0', paddingTop: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: 'var(--navy)' }}>
+                  Adjust Sats Balance
+                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--gray)', marginLeft: 8 }}>
+                    Current: {fmtSats(user.sats_balance)} sats
+                  </span>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Amount (positive to add, negative to deduct)</label>
+                  <input
+                    className="input"
+                    type="number"
+                    style={{ width: '100%' }}
+                    placeholder="e.g. 5000 or -2000"
+                    value={form.sats_adjustment}
+                    onChange={e => setForm(f => ({ ...f, sats_adjustment: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Reason (required for audit trail)</label>
+                  <textarea
+                    className="textarea"
+                    placeholder="e.g. Goodwill credit for support issue #1234"
+                    value={form.adjustment_reason}
+                    onChange={e => setForm(f => ({ ...f, adjustment_reason: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={onClose} disabled={saving}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                {saving ? <><div className="spinner spinner-sm"></div> Saving...</> : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ---- Customers Main ---- */
+    function CustomersScreen() {
+      const [users, setUsers] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [search, setSearch] = useState('');
+      const [statusFilter, setStatusFilter] = useState('');
+      const [planFilter, setPlanFilter] = useState('');
+      const [sort, setSort] = useState({ field: 'created_at', dir: 'desc' });
+      const [viewId, setViewId] = useState(null);
+      const [editId, setEditId] = useState(null);
+      const [deleteId, setDeleteId] = useState(null);
+      const [deleting, setDeleting] = useState(false);
+      const toast = useToast();
+
+      const fetchUsers = useCallback(() => {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (statusFilter) params.set('status', statusFilter);
+        if (planFilter) params.set('plan', planFilter);
+        apiFetch(`admin/users?${params}`)
+          .then(data => setUsers(data.users || []))
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, [search, statusFilter, planFilter]);
+
+      useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+      async function handleDelete() {
+        setDeleting(true);
+        try {
+          await apiFetch(`admin/users/${deleteId}`, { method: 'DELETE' });
+          toast('User deleted', 'success');
+          setDeleteId(null);
+          fetchUsers();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+        setDeleting(false);
+      }
+
+      const sorted = sortData(users, sort);
+
+      return (
+        <div>
+          <div className="card">
+            <div className="toolbar">
+              <div style={{ position: 'relative' }}>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="Search name, email, phone..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  style={{ paddingLeft: 34 }}
+                />
+                <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-light)' }}>
+                  <IconSearch />
+                </span>
+              </div>
+              <select className="select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select className="select" value={planFilter} onChange={e => setPlanFilter(e.target.value)}>
+                <option value="">All Plans</option>
+                <option value="none">None</option>
+                <option value="basic">Basic</option>
+                <option value="pro">Pro</option>
+              </select>
+              <div style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--gray)' }}>
+                {sorted.length} customer{sorted.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+            <div className="card-body">
+              {loading ? <Loading /> : sorted.length === 0 ? <EmptyState message="No customers found" /> : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <SortTh label="Name" field="name" sort={sort} setSort={setSort} />
+                        <SortTh label="Email" field="email" sort={sort} setSort={setSort} />
+                        <SortTh label="Plan" field="plan" sort={sort} setSort={setSort} />
+                        <SortTh label="Status" field="plan_status" sort={sort} setSort={setSort} />
+                        <SortTh label="Sats Balance" field="sats_balance" sort={sort} setSort={setSort} />
+                        <SortTh label="Data Used" field="data_used_mb" sort={sort} setSort={setSort} />
+                        <SortTh label="Joined" field="created_at" sort={sort} setSort={setSort} />
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sorted.map(u => (
+                        <tr key={u.id}>
+                          <td style={{ fontWeight: 500 }}>{u.name}</td>
+                          <td>{u.email}</td>
+                          <td><PlanBadge plan={u.plan} /></td>
+                          <td><StatusBadge status={u.plan_status} /></td>
+                          <td>{fmtSats(u.sats_balance)}</td>
+                          <td>{fmtDataUsed(u.data_used_mb)}</td>
+                          <td>{fmtDate(u.created_at)}</td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <button className="btn btn-outline btn-sm" onClick={() => setViewId(u.id)}>View</button>
+                              <button className="btn btn-outline btn-sm" onClick={() => setEditId(u.id)}>Edit</button>
+                              <button className="btn btn-outline btn-sm" style={{ color: 'var(--red)', borderColor: 'var(--red)' }} onClick={() => setDeleteId(u.id)}>Delete</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {viewId && <UserDetailModal userId={viewId} onClose={() => setViewId(null)} />}
+          {editId && <UserEditModal userId={editId} onClose={() => setEditId(null)} onSaved={() => { setEditId(null); fetchUsers(); }} />}
+          {deleteId && (
+            <ConfirmDialog
+              title="Delete Customer"
+              message="This will permanently delete this customer and all their data (transactions, invoices, referrals, withdrawals). This action cannot be undone."
+              onConfirm={handleDelete}
+              onCancel={() => setDeleteId(null)}
+              loading={deleting}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // TRANSACTIONS SCREEN
+    // =====================================================================
+    function TransactionsScreen() {
+      const [transactions, setTransactions] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [typeFilter, setTypeFilter] = useState('');
+      const [search, setSearch] = useState('');
+      const [sort, setSort] = useState({ field: 'created_at', dir: 'desc' });
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch('admin/transactions')
+          .then(data => setTransactions(data.transactions || []))
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      const filtered = useMemo(() => {
+        let list = transactions;
+        if (typeFilter) list = list.filter(t => t.type === typeFilter);
+        if (search) {
+          const q = search.toLowerCase();
+          list = list.filter(t =>
+            (t.user_name || '').toLowerCase().includes(q) ||
+            (t.user_email || '').toLowerCase().includes(q)
+          );
+        }
+        return sortData(list, sort);
+      }, [transactions, typeFilter, search, sort]);
+
+      return (
+        <div className="card">
+          <div className="toolbar">
+            <div style={{ position: 'relative' }}>
+              <input
+                className="input"
+                type="text"
+                placeholder="Search by user..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{ paddingLeft: 34 }}
+              />
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-light)' }}>
+                <IconSearch />
+              </span>
+            </div>
+            <select className="select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+              <option value="">All Types</option>
+              <option value="cashback">Cashback</option>
+              <option value="referral_bonus">Referral Bonus</option>
+              <option value="signup_bonus">Signup Bonus</option>
+              <option value="withdrawal">Withdrawal</option>
+              <option value="admin_adjustment">Admin Adjustment</option>
+            </select>
+            <button className="btn btn-outline" style={{ marginLeft: 'auto' }} onClick={() => toast('Export coming soon', 'info')}>Export CSV</button>
+          </div>
+          <div className="card-body">
+            {loading ? <Loading /> : filtered.length === 0 ? <EmptyState message="No transactions found" /> : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <SortTh label="Date" field="created_at" sort={sort} setSort={setSort} />
+                      <SortTh label="User" field="user_name" sort={sort} setSort={setSort} />
+                      <SortTh label="Type" field="type" sort={sort} setSort={setSort} />
+                      <th>Description</th>
+                      <SortTh label="Amount (sats)" field="amount" sort={sort} setSort={setSort} />
+                      <th>Reference</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map(tx => (
+                      <tr key={tx.id}>
+                        <td>{fmtDate(tx.created_at)}</td>
+                        <td style={{ fontWeight: 500 }}>{tx.user_name || '--'}<br/><span style={{ fontSize: 11, color: 'var(--gray)' }}>{tx.user_email || ''}</span></td>
+                        <td><span className="badge badge-gray">{tx.type}</span></td>
+                        <td style={{ whiteSpace: 'normal', maxWidth: 260 }}>{tx.description}</td>
+                        <td className={tx.amount >= 0 ? 'sats-positive' : 'sats-negative'}>
+                          {tx.amount >= 0 ? '+' : ''}{fmtSats(tx.amount)}
+                        </td>
+                        <td style={{ fontSize: 11, color: 'var(--gray)' }}>{truncate(tx.reference, 20)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // REFERRALS SCREEN
+    // =====================================================================
+    function ReferralsScreen() {
+      const [referrals, setReferrals] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [sort, setSort] = useState({ field: 'created_at', dir: 'desc' });
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch('admin/referrals')
+          .then(data => setReferrals(data.referrals || []))
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      const totalAll = referrals.length;
+      const qualifiedCount = referrals.filter(r => r.status === 'qualified').length;
+      const pendingCount = referrals.filter(r => r.status === 'pending').length;
+      const totalSats = referrals.reduce((s, r) => s + (r.referrer_sats || 0) + (r.referred_sats || 0), 0);
+
+      const sorted = sortData(referrals, sort);
+
+      return (
+        <div>
+          <div className="stat-grid" style={{ marginBottom: 20 }}>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Referrals</div>
+              <div className="stat-card-value">{totalAll}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Qualified</div>
+              <div className="stat-card-value" style={{ color: 'var(--green)' }}>{qualifiedCount}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Pending</div>
+              <div className="stat-card-value" style={{ color: 'var(--yellow)' }}>{pendingCount}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-card-label">Total Sats Distributed</div>
+              <div className="stat-card-value">{fmtSats(totalSats)}</div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header"><h3>All Referrals</h3></div>
+            <div className="card-body">
+              {loading ? <Loading /> : sorted.length === 0 ? <EmptyState message="No referrals yet" /> : (
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <SortTh label="Date" field="created_at" sort={sort} setSort={setSort} />
+                        <SortTh label="Referrer" field="referrer_name" sort={sort} setSort={setSort} />
+                        <SortTh label="Referred User" field="referred_name" sort={sort} setSort={setSort} />
+                        <SortTh label="Status" field="status" sort={sort} setSort={setSort} />
+                        <SortTh label="Referrer Sats" field="referrer_sats" sort={sort} setSort={setSort} />
+                        <SortTh label="Referred Sats" field="referred_sats" sort={sort} setSort={setSort} />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sorted.map(r => (
+                        <tr key={r.id}>
+                          <td>{fmtDate(r.created_at)}</td>
+                          <td>
+                            <span style={{ fontWeight: 500 }}>{r.referrer_name || '--'}</span>
+                            <br/><span style={{ fontSize: 11, color: 'var(--gray)' }}>{r.referrer_email || ''}</span>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 500 }}>{r.referred_name || '--'}</span>
+                            <br/><span style={{ fontSize: 11, color: 'var(--gray)' }}>{r.referred_email || ''}</span>
+                          </td>
+                          <td><StatusBadge status={r.status} /></td>
+                          <td className="sats-positive">{r.referrer_sats > 0 ? `+${fmtSats(r.referrer_sats)}` : '0'}</td>
+                          <td className="sats-positive">{r.referred_sats > 0 ? `+${fmtSats(r.referred_sats)}` : '0'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // INVOICES SCREEN
+    // =====================================================================
+    function InvoicesScreen() {
+      const [invoices, setInvoices] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [statusFilter, setStatusFilter] = useState('');
+      const [sort, setSort] = useState({ field: 'created_at', dir: 'desc' });
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch('admin/invoices')
+          .then(data => setInvoices(data.invoices || []))
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      const filtered = useMemo(() => {
+        let list = invoices;
+        if (statusFilter) list = list.filter(i => i.status === statusFilter);
+        return sortData(list, sort);
+      }, [invoices, statusFilter, sort]);
+
+      return (
+        <div className="card">
+          <div className="toolbar">
+            <select className="select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              <option value="">All Statuses</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="failed">Failed</option>
+            </select>
+            <div style={{ marginLeft: 'auto', fontSize: 13, color: 'var(--gray)' }}>
+              {filtered.length} invoice{filtered.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+          <div className="card-body">
+            {loading ? <Loading /> : filtered.length === 0 ? <EmptyState message="No invoices found" /> : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <SortTh label="Date" field="created_at" sort={sort} setSort={setSort} />
+                      <SortTh label="User" field="user_name" sort={sort} setSort={setSort} />
+                      <SortTh label="Plan" field="plan" sort={sort} setSort={setSort} />
+                      <SortTh label="Amount" field="amount_cents" sort={sort} setSort={setSort} />
+                      <SortTh label="Status" field="status" sort={sort} setSort={setSort} />
+                      <SortTh label="Period" field="billing_period" sort={sort} setSort={setSort} />
+                      <SortTh label="Sats Earned" field="sats_earned" sort={sort} setSort={setSort} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map(inv => (
+                      <tr key={inv.id}>
+                        <td>{fmtDate(inv.created_at)}</td>
+                        <td>
+                          <span style={{ fontWeight: 500 }}>{inv.user_name || '--'}</span>
+                          <br/><span style={{ fontSize: 11, color: 'var(--gray)' }}>{inv.user_email || ''}</span>
+                        </td>
+                        <td><PlanBadge plan={inv.plan} /></td>
+                        <td style={{ fontWeight: 600 }}>{fmtUSD(inv.amount_cents)}</td>
+                        <td><StatusBadge status={inv.status} /></td>
+                        <td>{inv.billing_period}</td>
+                        <td className="sats-positive">{fmtSats(inv.sats_earned)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // WITHDRAWALS SCREEN
+    // =====================================================================
+    function WithdrawalsScreen() {
+      const [withdrawals, setWithdrawals] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [sort, setSort] = useState({ field: 'created_at', dir: 'desc' });
+      const toast = useToast();
+
+      useEffect(() => {
+        apiFetch('admin/withdrawals')
+          .then(data => setWithdrawals(data.withdrawals || []))
+          .catch(err => toast(err.message, 'error'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      const sorted = sortData(withdrawals, sort);
+
+      return (
+        <div className="card">
+          <div className="card-header"><h3>All Withdrawals</h3></div>
+          <div className="card-body">
+            {loading ? <Loading /> : sorted.length === 0 ? <EmptyState message="No withdrawals yet" /> : (
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <SortTh label="Date" field="created_at" sort={sort} setSort={setSort} />
+                      <SortTh label="User" field="user_name" sort={sort} setSort={setSort} />
+                      <SortTh label="Amount (sats)" field="amount_sats" sort={sort} setSort={setSort} />
+                      <th>Destination</th>
+                      <SortTh label="Type" field="dest_type" sort={sort} setSort={setSort} />
+                      <SortTh label="Status" field="status" sort={sort} setSort={setSort} />
+                      <th>TX Hash</th>
+                      <SortTh label="Fee" field="fee_sats" sort={sort} setSort={setSort} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sorted.map(w => (
+                      <tr key={w.id}>
+                        <td>{fmtDate(w.created_at)}</td>
+                        <td>
+                          <span style={{ fontWeight: 500 }}>{w.user_name || '--'}</span>
+                          <br/><span style={{ fontSize: 11, color: 'var(--gray)' }}>{w.user_email || ''}</span>
+                        </td>
+                        <td style={{ fontWeight: 600 }}>{fmtSats(w.amount_sats)}</td>
+                        <td style={{ maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis' }} title={w.destination}>{truncate(w.destination, 24)}</td>
+                        <td><span className="badge badge-blue">{w.dest_type}</span></td>
+                        <td><StatusBadge status={w.status} /></td>
+                        <td style={{ fontSize: 11, color: 'var(--gray)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }} title={w.tx_hash}>{truncate(w.tx_hash, 20)}</td>
+                        <td>{fmtSats(w.fee_sats)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================================================================
+    // MAIN APP
+    // =====================================================================
+    const NAV_ITEMS = [
+      { key: 'dashboard',    label: 'Dashboard',     icon: IconDashboard },
+      { key: 'customers',    label: 'Customers',     icon: IconUsers },
+      { key: 'transactions', label: 'Transactions',  icon: IconTransactions },
+      { key: 'referrals',    label: 'Referrals',     icon: IconReferrals },
+      { key: 'invoices',     label: 'Invoices',      icon: IconInvoices },
+      { key: 'withdrawals',  label: 'Withdrawals',   icon: IconWithdrawals },
+    ];
+
+    function App() {
+      const [authed, setAuthed] = useState(!!getToken());
+      const [admin, setAdmin] = useState(null);
+      const [page, setPage] = useState('dashboard');
+      const [sidebarOpen, setSidebarOpen] = useState(false);
+
+      // Verify existing token on mount
+      useEffect(() => {
+        if (getToken()) {
+          apiFetch('auth/me')
+            .then(data => {
+              if (data.user && data.user.role === 'admin') {
+                setAdmin(data.user);
+                setAuthed(true);
+              } else {
+                clearToken();
+                setAuthed(false);
+              }
+            })
+            .catch(() => {
+              clearToken();
+              setAuthed(false);
+            });
+        }
+      }, []);
+
+      function handleLogin(user) {
+        setAdmin(user);
+        setAuthed(true);
+      }
+
+      function handleLogout() {
+        clearToken();
+        setAuthed(false);
+        setAdmin(null);
+      }
+
+      function handleNav(key) {
+        setPage(key);
+        setSidebarOpen(false);
+      }
+
+      if (!authed) return (
+        <ToastProvider>
+          <LoginScreen onLogin={handleLogin} />
+        </ToastProvider>
+      );
+
+      const pageTitle = NAV_ITEMS.find(n => n.key === page)?.label || 'Dashboard';
+
+      function renderPage() {
+        switch (page) {
+          case 'dashboard': return <DashboardScreen />;
+          case 'customers': return <CustomersScreen />;
+          case 'transactions': return <TransactionsScreen />;
+          case 'referrals': return <ReferralsScreen />;
+          case 'invoices': return <InvoicesScreen />;
+          case 'withdrawals': return <WithdrawalsScreen />;
+          default: return <DashboardScreen />;
+        }
+      }
+
+      return (
+        <ToastProvider>
+          <div className="app-layout">
+            {/* Mobile backdrop */}
+            {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+
+            {/* Sidebar */}
+            <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+              <div className="sidebar-brand">
+                <IconBitcoin />
+                <span>Bitcoin Agentic</span>
+              </div>
+              <nav className="sidebar-nav">
+                {NAV_ITEMS.map(item => (
+                  <button
+                    key={item.key}
+                    className={`sidebar-nav-item ${page === item.key ? 'active' : ''}`}
+                    onClick={() => handleNav(item.key)}
+                  >
+                    <item.icon />
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+              <div className="sidebar-footer">
+                <button onClick={handleLogout}>
+                  <IconLogout />
+                  Sign Out
+                </button>
+              </div>
+            </aside>
+
+            {/* Main */}
+            <div className="main-area">
+              <header className="topbar">
+                <div className="topbar-left">
+                  <button className="topbar-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                    <IconHamburger />
+                  </button>
+                  <span className="topbar-title">{pageTitle}</span>
+                </div>
+                <div className="topbar-right">
+                  <span className="topbar-admin-badge">
+                    <IconShield />
+                    {admin ? admin.name : 'Admin'}
+                  </span>
+                </div>
+              </header>
+              <div className="content-scroll">
+                {renderPage()}
+              </div>
+            </div>
+          </div>
+        </ToastProvider>
+      );
+    }
+
+    // =====================================================================
+    // MOUNT
+    // =====================================================================
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

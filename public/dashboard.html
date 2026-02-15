@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0D1B2A" />
+  <title>Bitcoin Agentic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F7931A;
+      --orange-light: #FFAD42;
+      --navy: #0D1B2A;
+      --navy-mid: #1B2838;
+      --navy-light: #243447;
+      --white: #FFFFFF;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --green: #10B981;
+      --green-light: #D1FAE5;
+      --red: #EF4444;
+      --red-light: #FEE2E2;
+      --blue: #3B82F6;
+      --blue-light: #DBEAFE;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --tab-height: 64px;
+    }
+
+    html, body, #root {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    input, button, textarea, select {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 0; height: 0; }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(100%); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade { animation: fadeIn 0.3s ease-out; }
+    .animate-slide-up { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    .animate-scale { animation: scaleIn 0.2s ease-out; }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    .spinner {
+      width: 24px; height: 24px;
+      border: 3px solid var(--gray-200);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      pointer-events: none;
+      width: calc(100% - 32px);
+      max-width: 400px;
+    }
+    .toast {
+      pointer-events: auto;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      animation: slideDown 0.3s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast-success { background: var(--green); color: white; }
+    .toast-error { background: var(--red); color: white; }
+    .toast-info { background: var(--navy); color: white; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useContext, createContext, useCallback, useRef, useMemo } = React;
+
+    // ========================================================================
+    // Constants & Helpers
+    // ========================================================================
+
+    const API_BASE = 'api';
+
+    function getApiUrl(path) {
+      // Build URL relative to current page location
+      const base = window.location.pathname.replace(/\/[^/]*$/, '/');
+      return base + API_BASE + '/' + path;
+    }
+
+    function formatSats(n) {
+      if (n == null) return '0';
+      return Number(n).toLocaleString('en-US');
+    }
+
+    function formatUsd(val) {
+      return parseFloat(val || 0).toFixed(2);
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      const now = new Date();
+      const diffMs = now - d;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHrs = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      if (diffHrs < 24) return `${diffHrs}h ago`;
+      if (diffDays < 7) return `${diffDays}d ago`;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    }
+
+    function formatDateFull(iso) {
+      if (!iso) return '';
+      return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatMonth(iso) {
+      if (!iso) return '';
+      return new Date(iso).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function groupByMonth(items) {
+      const groups = {};
+      for (const item of items) {
+        const key = item.created_at ? item.created_at.slice(0, 7) : 'unknown';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      }
+      return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
+    }
+
+    function planLabel(plan) {
+      if (plan === 'pro') return 'Pro';
+      if (plan === 'basic') return 'Basic';
+      return 'None';
+    }
+
+    function planColor(plan) {
+      if (plan === 'pro') return 'var(--orange)';
+      if (plan === 'basic') return 'var(--blue)';
+      return 'var(--gray-400)';
+    }
+
+    function txIcon(type, amount) {
+      if (type === 'withdrawal' || amount < 0) return { icon: '\u2191', color: 'var(--red)', bg: 'var(--red-light)' };
+      if (type === 'cashback') return { icon: '\u20BF', color: 'var(--orange)', bg: '#FEF3C7' };
+      if (type === 'referral_bonus') return { icon: '\u2764', color: 'var(--green)', bg: 'var(--green-light)' };
+      if (type === 'signup_bonus') return { icon: '\u2605', color: 'var(--blue)', bg: 'var(--blue-light)' };
+      return { icon: '\u26A1', color: 'var(--orange)', bg: '#FEF3C7' };
+    }
+
+    // ========================================================================
+    // Auth Context
+    // ========================================================================
+
+    const AuthContext = createContext(null);
+
+    function AuthProvider({ children }) {
+      const [token, setTokenState] = useState(() => localStorage.getItem('ba_token'));
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      const setToken = useCallback((t) => {
+        if (t) {
+          localStorage.setItem('ba_token', t);
+        } else {
+          localStorage.removeItem('ba_token');
+        }
+        setTokenState(t);
+      }, []);
+
+      const fetchWithAuth = useCallback(async (path, options = {}) => {
+        const currentToken = localStorage.getItem('ba_token');
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`;
+
+        const res = await fetch(getApiUrl(path), { ...options, headers });
+        if (res.status === 401) {
+          setToken(null);
+          setUser(null);
+          throw new Error('Session expired. Please sign in again.');
+        }
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        return data;
+      }, [setToken]);
+
+      useEffect(() => {
+        if (!token) { setLoading(false); setUser(null); return; }
+        fetchWithAuth('auth/me')
+          .then(data => { setUser(data.user); })
+          .catch(() => { setToken(null); setUser(null); })
+          .finally(() => setLoading(false));
+      }, [token, fetchWithAuth, setToken]);
+
+      const login = useCallback(async (email, password) => {
+        const data = await fetchWithAuth('auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+        setToken(data.token);
+        setUser(data.user);
+        return data;
+      }, [fetchWithAuth, setToken]);
+
+      const register = useCallback(async (name, email, password, referralCode) => {
+        const data = await fetchWithAuth('auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ name, email, password, referral_code: referralCode || undefined }),
+        });
+        setToken(data.token);
+        setUser(data.user);
+        return data;
+      }, [fetchWithAuth, setToken]);
+
+      const logout = useCallback(() => {
+        setToken(null);
+        setUser(null);
+      }, [setToken]);
+
+      const refreshUser = useCallback(async () => {
+        const data = await fetchWithAuth('auth/me');
+        setUser(data.user);
+      }, [fetchWithAuth]);
+
+      const value = useMemo(() => ({
+        token, user, loading, login, register, logout, fetchWithAuth, refreshUser, setUser,
+      }), [token, user, loading, login, register, logout, fetchWithAuth, refreshUser]);
+
+      return React.createElement(AuthContext.Provider, { value }, children);
+    }
+
+    function useAuth() {
+      return useContext(AuthContext);
+    }
+
+    // ========================================================================
+    // Toast System
+    // ========================================================================
+
+    const ToastContext = createContext(null);
+
+    function ToastProvider({ children }) {
+      const [toasts, setToasts] = useState([]);
+      const idRef = useRef(0);
+
+      const show = useCallback((message, type = 'info') => {
+        const id = ++idRef.current;
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+      }, []);
+
+      const value = useMemo(() => ({
+        success: (m) => show(m, 'success'),
+        error: (m) => show(m, 'error'),
+        info: (m) => show(m, 'info'),
+      }), [show]);
+
+      return React.createElement(ToastContext.Provider, { value },
+        children,
+        React.createElement('div', { className: 'toast-container' },
+          toasts.map(t =>
+            React.createElement('div', { key: t.id, className: `toast toast-${t.type}`, style: { marginBottom: 8 } },
+              t.type === 'success' ? '\u2713 ' : t.type === 'error' ? '\u2717 ' : '\u2139 ',
+              t.message
+            )
+          )
+        )
+      );
+    }
+
+    function useToast() { return useContext(ToastContext); }
+
+    // ========================================================================
+    // SVG Icons
+    // ========================================================================
+
+    function Icon({ name, size = 24, color = 'currentColor', style }) {
+      const s = { width: size, height: size, fill: 'none', stroke: color, strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', ...style };
+      const paths = {
+        home: React.createElement('g', null,
+          React.createElement('path', { d: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z' }),
+          React.createElement('polyline', { points: '9 22 9 12 15 12 15 22' })
+        ),
+        wallet: React.createElement('g', null,
+          React.createElement('rect', { x: 2, y: 5, width: 20, height: 16, rx: 2 }),
+          React.createElement('path', { d: 'M16 14h.01' }),
+          React.createElement('path', { d: 'M2 10h20' })
+        ),
+        users: React.createElement('g', null,
+          React.createElement('path', { d: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2' }),
+          React.createElement('circle', { cx: 9, cy: 7, r: 4 }),
+          React.createElement('path', { d: 'M23 21v-2a4 4 0 00-3-3.87' }),
+          React.createElement('path', { d: 'M16 3.13a4 4 0 010 7.75' })
+        ),
+        user: React.createElement('g', null,
+          React.createElement('path', { d: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4-4v2' }),
+          React.createElement('circle', { cx: 12, cy: 7, r: 4 })
+        ),
+        bitcoin: React.createElement('g', null,
+          React.createElement('path', { d: 'M11.767 19.089c4.924.868 6.14-6.025 1.216-6.894m-1.216 6.894L5.86 18.047m5.908 1.042l-.347 1.97m1.563-8.864c4.924.869 6.14-6.025 1.215-6.893m-1.215 6.893l-6.57-1.158m6.57 1.158l.348-1.97M7.116 9.05l-1.96-.346M7.116 9.05L6.77 11.02' }),
+          React.createElement('circle', { cx: 12, cy: 12, r: 10 })
+        ),
+        copy: React.createElement('g', null,
+          React.createElement('rect', { x: 9, y: 9, width: 13, height: 13, rx: 2 }),
+          React.createElement('path', { d: 'M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1' })
+        ),
+        share: React.createElement('g', null,
+          React.createElement('circle', { cx: 18, cy: 5, r: 3 }),
+          React.createElement('circle', { cx: 6, cy: 12, r: 3 }),
+          React.createElement('circle', { cx: 18, cy: 19, r: 3 }),
+          React.createElement('line', { x1: 8.59, y1: 13.51, x2: 15.42, y2: 17.49 }),
+          React.createElement('line', { x1: 15.41, y1: 6.51, x2: 8.59, y2: 10.49 })
+        ),
+        check: React.createElement('polyline', { points: '20 6 9 17 4 12' }),
+        x: React.createElement('g', null,
+          React.createElement('line', { x1: 18, y1: 6, x2: 6, y2: 18 }),
+          React.createElement('line', { x1: 6, y1: 6, x2: 18, y2: 18 })
+        ),
+        chevronRight: React.createElement('polyline', { points: '9 18 15 12 9 6' }),
+        chevronDown: React.createElement('polyline', { points: '6 9 12 15 18 9' }),
+        arrowLeft: React.createElement('g', null,
+          React.createElement('line', { x1: 19, y1: 12, x2: 5, y2: 12 }),
+          React.createElement('polyline', { points: '12 19 5 12 12 5' })
+        ),
+        logout: React.createElement('g', null,
+          React.createElement('path', { d: 'M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4' }),
+          React.createElement('polyline', { points: '16 17 21 12 16 7' }),
+          React.createElement('line', { x1: 21, y1: 12, x2: 9, y2: 12 })
+        ),
+        edit: React.createElement('g', null,
+          React.createElement('path', { d: 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7' }),
+          React.createElement('path', { d: 'M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z' })
+        ),
+        shield: React.createElement('g', null,
+          React.createElement('path', { d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' })
+        ),
+        zap: React.createElement('g', null,
+          React.createElement('polygon', { points: '13 2 3 14 12 14 11 22 21 10 12 10 13 2' })
+        ),
+        clock: React.createElement('g', null,
+          React.createElement('circle', { cx: 12, cy: 12, r: 10 }),
+          React.createElement('polyline', { points: '12 6 12 12 16 14' })
+        ),
+        gift: React.createElement('g', null,
+          React.createElement('polyline', { points: '20 12 20 22 4 22 4 12' }),
+          React.createElement('rect', { x: 2, y: 7, width: 20, height: 5, rx: 1 }),
+          React.createElement('line', { x1: 12, y1: 22, x2: 12, y2: 7 }),
+          React.createElement('path', { d: 'M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z' }),
+          React.createElement('path', { d: 'M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z' })
+        ),
+        creditCard: React.createElement('g', null,
+          React.createElement('rect', { x: 1, y: 4, width: 22, height: 16, rx: 2 }),
+          React.createElement('line', { x1: 1, y1: 10, x2: 23, y2: 10 })
+        ),
+        settings: React.createElement('g', null,
+          React.createElement('circle', { cx: 12, cy: 12, r: 3 }),
+          React.createElement('path', { d: 'M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z' })
+        ),
+        bell: React.createElement('g', null,
+          React.createElement('path', { d: 'M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9' }),
+          React.createElement('path', { d: 'M13.73 21a2 2 0 01-3.46 0' })
+        ),
+        receipt: React.createElement('g', null,
+          React.createElement('path', { d: 'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z' }),
+          React.createElement('line', { x1: 8, y1: 8, x2: 16, y2: 8 }),
+          React.createElement('line', { x1: 8, y1: 12, x2: 16, y2: 12 }),
+          React.createElement('line', { x1: 8, y1: 16, x2: 12, y2: 16 })
+        ),
+        refresh: React.createElement('g', null,
+          React.createElement('polyline', { points: '23 4 23 10 17 10' }),
+          React.createElement('path', { d: 'M20.49 15a9 9 0 11-2.12-9.36L23 10' })
+        ),
+      };
+
+      return React.createElement('svg', {
+        viewBox: '0 0 24 24',
+        style: s,
+        xmlns: 'http://www.w3.org/2000/svg',
+      }, paths[name] || null);
+    }
+
+    // Bitcoin logo SVG (filled, no stroke)
+    function BitcoinLogo({ size = 32, color = '#F7931A' }) {
+      return React.createElement('svg', { width: size, height: size, viewBox: '0 0 64 64', fill: 'none' },
+        React.createElement('circle', { cx: 32, cy: 32, r: 30, fill: color }),
+        React.createElement('path', {
+          d: 'M43.5 28.2c.6-3.9-2.4-6-6.5-7.4l1.3-5.3-3.2-.8-1.3 5.2c-.8-.2-1.7-.4-2.5-.6l1.3-5.2-3.2-.8-1.3 5.3c-.7-.2-1.3-.3-1.9-.5l-4.4-1.1-.9 3.4s2.4.5 2.3.6c1.3.3 1.5 1.2 1.5 1.9l-1.5 6c.1 0 .2 0 .3.1h-.3l-2.1 8.3c-.2.4-.6 1.1-1.5.8 0 0-2.3-.6-2.3-.6l-1.6 3.7 4.2 1 2.3.6-1.4 5.4 3.2.8 1.3-5.3c.9.2 1.7.4 2.5.6l-1.3 5.3 3.2.8 1.4-5.4c5.5 1 9.7.6 11.4-4.4 1.4-4-.1-6.3-3-7.8 2.1-.5 3.7-1.9 4.2-4.8zm-7.4 10.5c-1 4-7.9 1.8-10.1 1.3l1.8-7.2c2.2.6 9.4 1.6 8.3 5.9zm1-10.6c-.9 3.7-6.6 1.8-8.5 1.3l1.6-6.5c1.9.5 7.9 1.4 6.9 5.2z',
+          fill: 'white',
+        })
+      );
+    }
+
+    // ========================================================================
+    // Reusable Components
+    // ========================================================================
+
+    function LoadingScreen() {
+      return React.createElement('div', {
+        style: {
+          height: '100%', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: 16, background: 'var(--navy)',
+        },
+      },
+        React.createElement(BitcoinLogo, { size: 56 }),
+        React.createElement('div', { className: 'spinner', style: { borderTopColor: 'var(--orange)', borderColor: 'rgba(255,255,255,0.15)', marginTop: 8 } }),
+      );
+    }
+
+    function EmptyState({ icon, title, subtitle, action }) {
+      return React.createElement('div', {
+        className: 'animate-fade',
+        style: {
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', padding: '40px 24px', textAlign: 'center',
+        },
+      },
+        React.createElement('div', {
+          style: {
+            width: 64, height: 64, borderRadius: '50%', background: 'var(--gray-100)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+          },
+        }, React.createElement(Icon, { name: icon, size: 28, color: 'var(--gray-400)' })),
+        React.createElement('div', { style: { fontSize: 16, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 4 } }, title),
+        subtitle && React.createElement('div', { style: { fontSize: 14, color: 'var(--gray-500)', maxWidth: 280, lineHeight: 1.5 } }, subtitle),
+        action && React.createElement('div', { style: { marginTop: 16 } }, action),
+      );
+    }
+
+    function Button({ children, onClick, variant = 'primary', size = 'md', disabled, loading, style, fullWidth }) {
+      const base = {
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        border: 'none', borderRadius: 12, cursor: disabled ? 'not-allowed' : 'pointer',
+        fontWeight: 600, transition: 'all 0.15s ease',
+        opacity: disabled ? 0.5 : 1,
+        width: fullWidth ? '100%' : undefined,
+        minHeight: 48,
+      };
+      const sizes = {
+        sm: { padding: '8px 16px', fontSize: 13, minHeight: 40, borderRadius: 10 },
+        md: { padding: '12px 24px', fontSize: 15 },
+        lg: { padding: '16px 32px', fontSize: 16, minHeight: 54 },
+      };
+      const variants = {
+        primary: { background: 'var(--orange)', color: 'white' },
+        secondary: { background: 'var(--navy)', color: 'white' },
+        outline: { background: 'transparent', color: 'var(--navy)', border: '2px solid var(--gray-200)' },
+        ghost: { background: 'transparent', color: 'var(--gray-600)' },
+        danger: { background: 'var(--red)', color: 'white' },
+        success: { background: 'var(--green)', color: 'white' },
+      };
+
+      return React.createElement('button', {
+        onClick: disabled || loading ? undefined : onClick,
+        style: { ...base, ...sizes[size], ...variants[variant], ...style },
+      },
+        loading ? React.createElement('div', { className: 'spinner', style: { width: 18, height: 18, borderWidth: 2, borderTopColor: 'white', borderColor: 'rgba(255,255,255,0.3)' } }) : null,
+        children,
+      );
+    }
+
+    function Card({ children, style, className, onClick }) {
+      return React.createElement('div', {
+        onClick,
+        className,
+        style: {
+          background: 'white', borderRadius: 16, padding: 20,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+          ...style,
+        },
+      }, children);
+    }
+
+    function Input({ label, type = 'text', value, onChange, placeholder, error, autoComplete, style: outerStyle }) {
+      return React.createElement('div', { style: { marginBottom: 16, ...outerStyle } },
+        label && React.createElement('label', {
+          style: { display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--gray-600)', marginBottom: 6 },
+        }, label),
+        React.createElement('input', {
+          type, value, placeholder, autoComplete,
+          onChange: e => onChange(e.target.value),
+          style: {
+            width: '100%', padding: '14px 16px', border: `2px solid ${error ? 'var(--red)' : 'var(--gray-200)'}`,
+            borderRadius: 12, fontSize: 15, outline: 'none', transition: 'border-color 0.15s',
+            background: 'var(--gray-50)', minHeight: 48,
+          },
+          onFocus: e => { if (!error) e.target.style.borderColor = 'var(--orange)'; },
+          onBlur: e => { if (!error) e.target.style.borderColor = 'var(--gray-200)'; },
+        }),
+        error && React.createElement('div', { style: { fontSize: 12, color: 'var(--red)', marginTop: 4 } }, error),
+      );
+    }
+
+    function Modal({ open, onClose, title, children }) {
+      if (!open) return null;
+      return React.createElement('div', {
+        style: {
+          position: 'fixed', inset: 0, zIndex: 9000,
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        },
+        onClick: onClose,
+      },
+        React.createElement('div', {
+          style: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' },
+        }),
+        React.createElement('div', {
+          className: 'animate-slide-up',
+          onClick: e => e.stopPropagation(),
+          style: {
+            position: 'relative', background: 'white', borderRadius: '20px 20px 0 0',
+            width: '100%', maxWidth: 500, maxHeight: '85vh', overflow: 'auto',
+            padding: '8px 0 0', paddingBottom: 'calc(20px + var(--safe-bottom))',
+          },
+        },
+          React.createElement('div', {
+            style: { width: 40, height: 4, borderRadius: 2, background: 'var(--gray-300)', margin: '0 auto 16px' },
+          }),
+          title && React.createElement('div', {
+            style: {
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '0 20px 16px', borderBottom: '1px solid var(--gray-100)',
+            },
+          },
+            React.createElement('h3', { style: { fontSize: 18, fontWeight: 700 } }, title),
+            React.createElement('button', {
+              onClick: onClose,
+              style: {
+                width: 36, height: 36, borderRadius: '50%', border: 'none',
+                background: 'var(--gray-100)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              },
+            }, React.createElement(Icon, { name: 'x', size: 18, color: 'var(--gray-500)' })),
+          ),
+          React.createElement('div', { style: { padding: 20 } }, children),
+        ),
+      );
+    }
+
+    function Toggle({ checked, onChange, label }) {
+      return React.createElement('div', {
+        style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0' },
+        onClick: () => onChange(!checked),
+      },
+        React.createElement('span', { style: { fontSize: 15, color: 'var(--gray-700)' } }, label),
+        React.createElement('div', {
+          style: {
+            width: 48, height: 28, borderRadius: 14, padding: 2, cursor: 'pointer',
+            background: checked ? 'var(--green)' : 'var(--gray-300)',
+            transition: 'background 0.2s',
+          },
+        },
+          React.createElement('div', {
+            style: {
+              width: 24, height: 24, borderRadius: '50%', background: 'white',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              transform: checked ? 'translateX(20px)' : 'translateX(0)',
+              transition: 'transform 0.2s',
+            },
+          }),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // Auth Screen
+    // ========================================================================
+
+    function AuthScreen() {
+      const [mode, setMode] = useState('login');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [name, setName] = useState('');
+      const [referralCode, setReferralCode] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+      const { login, register } = useAuth();
+      const toast = useToast();
+
+      // Check URL for referral code
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref) {
+          setReferralCode(ref);
+          setMode('register');
+        }
+      }, []);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+          if (mode === 'login') {
+            await login(email, password);
+            toast.success('Welcome back!');
+          } else {
+            if (!name.trim()) { setError('Name is required'); setLoading(false); return; }
+            if (password.length < 8) { setError('Password must be at least 8 characters'); setLoading(false); return; }
+            await register(name, email, password, referralCode);
+            toast.success('Account created! Welcome to Bitcoin Agentic.');
+          }
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return React.createElement('div', {
+        style: {
+          minHeight: '100%', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', padding: 24,
+          background: 'linear-gradient(160deg, #0D1B2A 0%, #162640 50%, #1B3050 100%)',
+        },
+      },
+        React.createElement('div', {
+          className: 'animate-fade',
+          style: { width: '100%', maxWidth: 400 },
+        },
+          // Logo
+          React.createElement('div', {
+            style: { textAlign: 'center', marginBottom: 32 },
+          },
+            React.createElement('div', { style: { display: 'flex', justifyContent: 'center', marginBottom: 16 } },
+              React.createElement(BitcoinLogo, { size: 56 }),
+            ),
+            React.createElement('h1', {
+              style: { fontSize: 24, fontWeight: 800, color: 'white', marginBottom: 4 },
+            }, 'Bitcoin Agentic'),
+            React.createElement('p', {
+              style: { fontSize: 14, color: 'rgba(255,255,255,0.55)' },
+            }, 'The Bitcoin-native mobile carrier'),
+          ),
+
+          // Card
+          React.createElement(Card, { style: { padding: 24 } },
+            // Tab toggle
+            React.createElement('div', {
+              style: {
+                display: 'flex', background: 'var(--gray-100)', borderRadius: 10,
+                padding: 3, marginBottom: 24,
+              },
+            },
+              ['login', 'register'].map(m =>
+                React.createElement('button', {
+                  key: m,
+                  onClick: () => { setMode(m); setError(''); },
+                  style: {
+                    flex: 1, padding: '10px 0', border: 'none', borderRadius: 8,
+                    fontSize: 14, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                    background: mode === m ? 'white' : 'transparent',
+                    color: mode === m ? 'var(--navy)' : 'var(--gray-500)',
+                    boxShadow: mode === m ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  },
+                }, m === 'login' ? 'Sign In' : 'Create Account'),
+              ),
+            ),
+
+            // Form
+            React.createElement('form', { onSubmit: handleSubmit },
+              mode === 'register' && React.createElement(Input, {
+                label: 'Full Name', value: name, onChange: setName,
+                placeholder: 'Your name', autoComplete: 'name',
+              }),
+              React.createElement(Input, {
+                label: 'Email', type: 'email', value: email, onChange: setEmail,
+                placeholder: 'you@email.com', autoComplete: 'email',
+              }),
+              React.createElement(Input, {
+                label: 'Password', type: 'password', value: password, onChange: setPassword,
+                placeholder: mode === 'login' ? 'Your password' : 'Min 8 characters',
+                autoComplete: mode === 'login' ? 'current-password' : 'new-password',
+              }),
+              mode === 'register' && React.createElement(Input, {
+                label: 'Referral Code (optional)', value: referralCode, onChange: setReferralCode,
+                placeholder: 'e.g. MARCUS-A1B2',
+              }),
+
+              error && React.createElement('div', {
+                className: 'animate-fade',
+                style: {
+                  padding: '12px 16px', borderRadius: 10, background: 'var(--red-light)',
+                  color: 'var(--red)', fontSize: 13, fontWeight: 500, marginBottom: 16,
+                },
+              }, error),
+
+              React.createElement(Button, {
+                type: 'submit', fullWidth: true, loading, disabled: loading || !email || !password,
+                style: { marginTop: 4 },
+              }, mode === 'login' ? 'Sign In' : 'Create Account'),
+            ),
+          ),
+
+          React.createElement('p', {
+            style: { textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 24 },
+          }, 'Pay your phone bill. Stack sats.'),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // Balance Hero Card (shared between Home & Wallet)
+    // ========================================================================
+
+    function BalanceCard({ satsBalance, satsUsd, compact }) {
+      return React.createElement('div', {
+        style: {
+          background: 'linear-gradient(135deg, #0D1B2A 0%, #162640 50%, #1E3A5F 100%)',
+          borderRadius: 20, padding: compact ? '20px 20px' : '24px 24px 28px',
+          color: 'white', position: 'relative', overflow: 'hidden',
+        },
+      },
+        // Background decoration
+        React.createElement('div', {
+          style: {
+            position: 'absolute', right: -20, top: -20, opacity: 0.06,
+          },
+        }, React.createElement(BitcoinLogo, { size: compact ? 120 : 160, color: '#F7931A' })),
+
+        React.createElement('div', { style: { position: 'relative', zIndex: 1 } },
+          React.createElement('div', {
+            style: { fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' },
+          }, 'Sats Balance'),
+          React.createElement('div', {
+            style: { fontSize: compact ? 32 : 38, fontWeight: 800, lineHeight: 1.1, marginBottom: 4 },
+          }, formatSats(satsBalance), React.createElement('span', { style: { fontSize: 16, fontWeight: 500, opacity: 0.6, marginLeft: 6 } }, 'sats')),
+          React.createElement('div', {
+            style: { fontSize: 15, color: 'rgba(255,255,255,0.5)' },
+          }, '~ $', formatUsd(satsUsd), ' USD'),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // HOME TAB
+    // ========================================================================
+
+    function HomeTab() {
+      const { user, fetchWithAuth } = useAuth();
+      const toast = useToast();
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [refreshing, setRefreshing] = useState(false);
+
+      const loadDashboard = useCallback(async (silent) => {
+        if (!silent) setLoading(true);
+        try {
+          const d = await fetchWithAuth('dashboard');
+          setData(d);
+        } catch (err) {
+          if (!silent) toast.error(err.message);
+        } finally {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      }, [fetchWithAuth, toast]);
+
+      useEffect(() => { loadDashboard(); }, [loadDashboard]);
+
+      const handleRefresh = () => {
+        setRefreshing(true);
+        loadDashboard(true).then(() => toast.info('Refreshed'));
+      };
+
+      if (loading) {
+        return React.createElement('div', { style: { padding: 20 } },
+          React.createElement('div', { className: 'skeleton', style: { height: 140, marginBottom: 16 } }),
+          React.createElement('div', { className: 'skeleton', style: { height: 120, marginBottom: 16 } }),
+          React.createElement('div', { className: 'skeleton', style: { height: 200 } }),
+        );
+      }
+
+      if (!data) return React.createElement(EmptyState, { icon: 'home', title: 'Could not load dashboard', subtitle: 'Pull down to refresh.' });
+
+      const planInfo = data.plan_details;
+      const hasPlan = data.user.plan !== 'none' && data.user.plan_status === 'active';
+      const dataPercent = planInfo ? Math.min(100, Math.round((data.data_used_mb / (planInfo.data_gb * 1024)) * 100)) : 0;
+      const dataColor = dataPercent > 90 ? 'var(--red)' : dataPercent > 70 ? 'var(--orange)' : 'var(--green)';
+
+      return React.createElement('div', { className: 'animate-fade', style: { padding: '0 16px 16px' } },
+        // Pull-to-refresh button
+        React.createElement('div', { style: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8 } },
+          React.createElement('button', {
+            onClick: handleRefresh,
+            disabled: refreshing,
+            style: {
+              background: 'none', border: 'none', cursor: 'pointer', padding: 8,
+              display: 'flex', alignItems: 'center', gap: 4, color: 'var(--gray-400)',
+              fontSize: 12, fontWeight: 500,
+            },
+          },
+            React.createElement(Icon, {
+              name: 'refresh', size: 16, color: 'var(--gray-400)',
+              style: refreshing ? { animation: 'spin 0.7s linear infinite' } : {},
+            }),
+            'Refresh',
+          ),
+        ),
+
+        // Balance card
+        React.createElement(BalanceCard, { satsBalance: data.sats_balance, satsUsd: data.sats_usd }),
+
+        // Plan card
+        hasPlan ? React.createElement(Card, {
+          style: { marginTop: 16 },
+        },
+          React.createElement('div', {
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+          },
+            React.createElement('div', null,
+              React.createElement('div', { style: { fontSize: 13, color: 'var(--gray-500)', fontWeight: 500 } }, 'Current Plan'),
+              React.createElement('div', { style: { fontSize: 18, fontWeight: 700, color: 'var(--navy)' } },
+                planInfo.name, ' ',
+                React.createElement('span', { style: { fontSize: 14, fontWeight: 500, color: 'var(--gray-500)' } }, '$', planInfo.price, '/mo'),
+              ),
+            ),
+            React.createElement('div', {
+              style: {
+                padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                background: 'var(--green-light)', color: 'var(--green)',
+              },
+            }, 'Active'),
+          ),
+
+          // Data usage
+          React.createElement('div', { style: { marginBottom: 8 } },
+            React.createElement('div', {
+              style: { display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--gray-500)', marginBottom: 6 },
+            },
+              React.createElement('span', null, 'Data Usage'),
+              React.createElement('span', null,
+                (data.data_used_mb / 1024).toFixed(1), ' / ', planInfo.data_gb, ' GB',
+              ),
+            ),
+            React.createElement('div', {
+              style: { height: 8, borderRadius: 4, background: 'var(--gray-100)', overflow: 'hidden' },
+            },
+              React.createElement('div', {
+                style: {
+                  height: '100%', borderRadius: 4, width: `${dataPercent}%`,
+                  background: dataColor, transition: 'width 0.5s ease',
+                },
+              }),
+            ),
+          ),
+
+          data.current_invoice && React.createElement('div', {
+            style: { fontSize: 12, color: 'var(--gray-400)', marginTop: 8 },
+          },
+            'Next billing: ',
+            formatDateFull(new Date(new Date(data.current_invoice.created_at).getTime() + 30 * 86400000).toISOString()),
+          ),
+        ) : React.createElement(Card, {
+          style: {
+            marginTop: 16, textAlign: 'center', padding: 28,
+            background: 'linear-gradient(135deg, #FFF8F0 0%, #FFFFFF 100%)',
+            border: '2px dashed var(--orange)', borderRadius: 16,
+          },
+        },
+          React.createElement(Icon, { name: 'zap', size: 32, color: 'var(--orange)', style: { margin: '0 auto 12px', display: 'block', fill: 'var(--orange)', stroke: 'var(--orange)' } }),
+          React.createElement('div', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 } },
+            'Choose a plan to start earning Bitcoin',
+          ),
+          React.createElement('div', { style: { fontSize: 13, color: 'var(--gray-500)', marginBottom: 16 } },
+            'Get cashback in sats every month',
+          ),
+          React.createElement(Button, { size: 'md' }, 'Pick Your Plan'),
+        ),
+
+        // Cashback info row
+        hasPlan && React.createElement(Card, { style: { marginTop: 16, display: 'flex', alignItems: 'center', gap: 16 } },
+          React.createElement('div', {
+            style: {
+              width: 44, height: 44, borderRadius: 12, display: 'flex',
+              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              background: '#FEF3C7',
+            },
+          }, React.createElement(BitcoinLogo, { size: 24 })),
+          React.createElement('div', { style: { flex: 1 } },
+            React.createElement('div', { style: { fontSize: 14, fontWeight: 600, color: 'var(--navy)' } },
+              'Monthly Cashback: ', formatSats(planInfo.sats_per_month), ' sats',
+            ),
+            React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-500)' } },
+              planInfo.cashback_pct, '% of your $', planInfo.price, '/mo plan',
+            ),
+          ),
+        ),
+
+        // Recent transactions
+        React.createElement('div', { style: { marginTop: 24 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Recent Activity'),
+
+          data.recent_transactions.length === 0
+            ? React.createElement(EmptyState, { icon: 'clock', title: 'No transactions yet', subtitle: 'Your activity will appear here.' })
+            : data.recent_transactions.map(tx => {
+              const ti = txIcon(tx.type, tx.amount);
+              return React.createElement(Card, {
+                key: tx.id,
+                style: {
+                  display: 'flex', alignItems: 'center', gap: 12, padding: 14,
+                  marginBottom: 8,
+                },
+              },
+                React.createElement('div', {
+                  style: {
+                    width: 40, height: 40, borderRadius: 10, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    background: ti.bg, fontSize: 16,
+                  },
+                }, ti.icon),
+                React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                  React.createElement('div', { style: { fontSize: 14, fontWeight: 500, color: 'var(--navy)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, tx.description),
+                  React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-400)' } }, formatDate(tx.created_at)),
+                ),
+                React.createElement('div', {
+                  style: {
+                    fontSize: 14, fontWeight: 700, flexShrink: 0,
+                    color: tx.amount >= 0 ? 'var(--green)' : 'var(--red)',
+                  },
+                }, tx.amount >= 0 ? '+' : '', formatSats(tx.amount)),
+              );
+            }),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // WALLET TAB
+    // ========================================================================
+
+    function WalletTab() {
+      const { fetchWithAuth } = useAuth();
+      const toast = useToast();
+      const [balance, setBalance] = useState(null);
+      const [history, setHistory] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [showWithdraw, setShowWithdraw] = useState(false);
+      const [withdrawStep, setWithdrawStep] = useState(1);
+      const [withdrawAmount, setWithdrawAmount] = useState('');
+      const [withdrawDest, setWithdrawDest] = useState('');
+      const [withdrawType, setWithdrawType] = useState('lightning');
+      const [withdrawing, setWithdrawing] = useState(false);
+      const [withdrawResult, setWithdrawResult] = useState(null);
+
+      const loadWallet = useCallback(async () => {
+        try {
+          const [b, h] = await Promise.all([
+            fetchWithAuth('wallet/balance'),
+            fetchWithAuth('wallet/history?limit=50'),
+          ]);
+          setBalance(b);
+          setHistory(h.transactions || []);
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }, [fetchWithAuth, toast]);
+
+      useEffect(() => { loadWallet(); }, [loadWallet]);
+
+      const canWithdraw = balance && balance.sats_balance >= balance.min_withdrawal;
+
+      const openWithdraw = () => {
+        setWithdrawStep(1);
+        setWithdrawAmount(String(balance?.sats_balance || 0));
+        setWithdrawDest('');
+        setWithdrawType('lightning');
+        setWithdrawResult(null);
+        setShowWithdraw(true);
+      };
+
+      const doWithdraw = async () => {
+        setWithdrawing(true);
+        try {
+          const res = await fetchWithAuth('wallet/withdraw', {
+            method: 'POST',
+            body: JSON.stringify({
+              amount_sats: parseInt(withdrawAmount),
+              destination: withdrawDest,
+              dest_type: withdrawType,
+            }),
+          });
+          setWithdrawResult(res.withdrawal);
+          setWithdrawStep(4);
+          toast.success('Withdrawal successful!');
+          loadWallet();
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setWithdrawing(false);
+        }
+      };
+
+      if (loading) {
+        return React.createElement('div', { style: { padding: 20 } },
+          React.createElement('div', { className: 'skeleton', style: { height: 140, marginBottom: 16 } }),
+          React.createElement('div', { className: 'skeleton', style: { height: 48, marginBottom: 16 } }),
+          React.createElement('div', { className: 'skeleton', style: { height: 300 } }),
+        );
+      }
+
+      const grouped = groupByMonth(history);
+      const fee = withdrawType === 'lightning' ? 10 : 500;
+
+      return React.createElement('div', { className: 'animate-fade', style: { padding: '0 16px 16px' } },
+        React.createElement(BalanceCard, {
+          satsBalance: balance?.sats_balance,
+          satsUsd: balance?.sats_usd,
+        }),
+
+        // Action buttons
+        React.createElement('div', { style: { display: 'flex', gap: 12, marginTop: 16 } },
+          React.createElement(Button, {
+            fullWidth: true,
+            variant: canWithdraw ? 'primary' : 'outline',
+            disabled: !canWithdraw,
+            onClick: openWithdraw,
+          },
+            React.createElement(Icon, { name: 'zap', size: 18, color: canWithdraw ? 'white' : 'var(--gray-400)' }),
+            'Withdraw',
+          ),
+          React.createElement(Button, {
+            fullWidth: true, variant: 'outline',
+            onClick: () => { /* scroll to history */ },
+          },
+            React.createElement(Icon, { name: 'clock', size: 18 }),
+            'History',
+          ),
+        ),
+
+        !canWithdraw && balance && React.createElement('div', {
+          style: {
+            marginTop: 12, padding: '12px 16px', borderRadius: 12,
+            background: '#FEF3C7', fontSize: 13, color: '#92400E',
+            textAlign: 'center',
+          },
+        },
+          'Earn ', formatSats(balance.min_withdrawal - balance.sats_balance), ' more sats to unlock withdrawals',
+          React.createElement('div', { style: { fontSize: 11, marginTop: 2, opacity: 0.7 } },
+            'Minimum: ', formatSats(balance.min_withdrawal), ' sats',
+          ),
+        ),
+
+        // Transaction history
+        React.createElement('div', { style: { marginTop: 24 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Transaction History'),
+
+          history.length === 0
+            ? React.createElement(EmptyState, { icon: 'clock', title: 'No transactions yet' })
+            : grouped.map(([month, txs]) =>
+              React.createElement('div', { key: month, style: { marginBottom: 20 } },
+                React.createElement('div', {
+                  style: { fontSize: 13, fontWeight: 600, color: 'var(--gray-400)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' },
+                }, formatMonth(month + '-01')),
+                txs.map(tx => {
+                  const ti = txIcon(tx.type, tx.amount);
+                  return React.createElement(Card, {
+                    key: tx.id,
+                    style: { display: 'flex', alignItems: 'center', gap: 12, padding: 14, marginBottom: 6 },
+                  },
+                    React.createElement('div', {
+                      style: {
+                        width: 40, height: 40, borderRadius: 10, display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        background: ti.bg, fontSize: 16,
+                      },
+                    }, ti.icon),
+                    React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                      React.createElement('div', { style: { fontSize: 14, fontWeight: 500, color: 'var(--navy)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, tx.description),
+                      React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-400)' } }, formatDate(tx.created_at)),
+                    ),
+                    React.createElement('div', {
+                      style: {
+                        fontSize: 14, fontWeight: 700, flexShrink: 0,
+                        color: tx.amount >= 0 ? 'var(--green)' : 'var(--red)',
+                      },
+                    }, tx.amount >= 0 ? '+' : '', formatSats(tx.amount)),
+                  );
+                }),
+              ),
+            ),
+        ),
+
+        // Withdraw Modal
+        React.createElement(Modal, {
+          open: showWithdraw,
+          onClose: () => setShowWithdraw(false),
+          title: withdrawStep === 4 ? 'Withdrawal Complete' : `Withdraw Sats (Step ${withdrawStep}/3)`,
+        },
+          // Step 1: Amount
+          withdrawStep === 1 && React.createElement('div', null,
+            React.createElement(Input, {
+              label: 'Amount (sats)',
+              type: 'number',
+              value: withdrawAmount,
+              onChange: setWithdrawAmount,
+              placeholder: 'Enter amount',
+            }),
+            React.createElement('div', { style: { fontSize: 13, color: 'var(--gray-500)', marginBottom: 16 } },
+              'Available: ', formatSats(balance?.sats_balance), ' sats',
+              React.createElement('span', {
+                style: { color: 'var(--orange)', cursor: 'pointer', fontWeight: 600, marginLeft: 8 },
+                onClick: () => setWithdrawAmount(String(balance?.sats_balance || 0)),
+              }, 'Max'),
+            ),
+            React.createElement(Button, {
+              fullWidth: true,
+              disabled: !withdrawAmount || parseInt(withdrawAmount) < (balance?.min_withdrawal || 10000) || parseInt(withdrawAmount) > (balance?.sats_balance || 0),
+              onClick: () => setWithdrawStep(2),
+            }, 'Next'),
+            parseInt(withdrawAmount) < (balance?.min_withdrawal || 10000) && withdrawAmount && React.createElement('div', {
+              style: { fontSize: 12, color: 'var(--red)', marginTop: 8, textAlign: 'center' },
+            }, 'Minimum withdrawal: ', formatSats(balance?.min_withdrawal), ' sats'),
+          ),
+
+          // Step 2: Destination
+          withdrawStep === 2 && React.createElement('div', null,
+            React.createElement('div', { style: { marginBottom: 16 } },
+              React.createElement('label', { style: { display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--gray-600)', marginBottom: 8 } }, 'Destination Type'),
+              React.createElement('div', { style: { display: 'flex', gap: 8 } },
+                ['lightning', 'onchain'].map(t =>
+                  React.createElement('button', {
+                    key: t,
+                    onClick: () => setWithdrawType(t),
+                    style: {
+                      flex: 1, padding: '12px 16px', borderRadius: 12, border: '2px solid',
+                      borderColor: withdrawType === t ? 'var(--orange)' : 'var(--gray-200)',
+                      background: withdrawType === t ? '#FFF8F0' : 'white',
+                      cursor: 'pointer', fontWeight: 600, fontSize: 14,
+                      color: withdrawType === t ? 'var(--orange)' : 'var(--gray-500)',
+                    },
+                  },
+                    React.createElement(Icon, { name: 'zap', size: 16, color: withdrawType === t ? 'var(--orange)' : 'var(--gray-400)', style: { display: 'inline', verticalAlign: 'middle', marginRight: 4 } }),
+                    t === 'lightning' ? 'Lightning' : 'On-chain',
+                  ),
+                ),
+              ),
+            ),
+            React.createElement(Input, {
+              label: withdrawType === 'lightning' ? 'Lightning Invoice' : 'BTC Address',
+              value: withdrawDest,
+              onChange: setWithdrawDest,
+              placeholder: withdrawType === 'lightning' ? 'lnbc...' : 'bc1...',
+            }),
+            React.createElement('div', { style: { display: 'flex', gap: 12 } },
+              React.createElement(Button, { fullWidth: true, variant: 'outline', onClick: () => setWithdrawStep(1) }, 'Back'),
+              React.createElement(Button, { fullWidth: true, disabled: !withdrawDest, onClick: () => setWithdrawStep(3) }, 'Next'),
+            ),
+          ),
+
+          // Step 3: Confirm
+          withdrawStep === 3 && React.createElement('div', null,
+            React.createElement(Card, { style: { background: 'var(--gray-50)', marginBottom: 16 } },
+              [
+                ['Amount', formatSats(withdrawAmount) + ' sats'],
+                ['Network Fee', formatSats(fee) + ' sats'],
+                ['You Receive', formatSats(parseInt(withdrawAmount) - fee) + ' sats'],
+                ['Type', withdrawType === 'lightning' ? 'Lightning' : 'On-chain'],
+                ['Destination', withdrawDest.slice(0, 20) + '...'],
+              ].map(([k, v], i) =>
+                React.createElement('div', {
+                  key: k,
+                  style: {
+                    display: 'flex', justifyContent: 'space-between', padding: '8px 0',
+                    borderBottom: i < 4 ? '1px solid var(--gray-200)' : 'none',
+                  },
+                },
+                  React.createElement('span', { style: { fontSize: 14, color: 'var(--gray-500)' } }, k),
+                  React.createElement('span', {
+                    style: {
+                      fontSize: 14, fontWeight: k === 'You Receive' ? 700 : 500,
+                      color: k === 'You Receive' ? 'var(--green)' : 'var(--navy)',
+                    },
+                  }, v),
+                ),
+              ),
+            ),
+            React.createElement('div', { style: { display: 'flex', gap: 12 } },
+              React.createElement(Button, { fullWidth: true, variant: 'outline', onClick: () => setWithdrawStep(2) }, 'Back'),
+              React.createElement(Button, { fullWidth: true, variant: 'success', loading: withdrawing, disabled: withdrawing, onClick: doWithdraw }, 'Confirm Withdrawal'),
+            ),
+          ),
+
+          // Step 4: Success
+          withdrawStep === 4 && withdrawResult && React.createElement('div', { style: { textAlign: 'center' } },
+            React.createElement('div', {
+              style: {
+                width: 64, height: 64, borderRadius: '50%', background: 'var(--green-light)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px',
+              },
+            }, React.createElement(Icon, { name: 'check', size: 32, color: 'var(--green)' })),
+            React.createElement('div', { style: { fontSize: 18, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 } }, 'Withdrawal Sent!'),
+            React.createElement('div', { style: { fontSize: 14, color: 'var(--gray-500)', marginBottom: 16 } },
+              formatSats(withdrawResult.amount_sats), ' sats sent via ', withdrawResult.dest_type,
+            ),
+            React.createElement(Card, { style: { background: 'var(--gray-50)', marginBottom: 16, textAlign: 'left' } },
+              React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-500)', marginBottom: 4 } }, 'Transaction Hash'),
+              React.createElement('div', { style: { fontSize: 13, fontWeight: 500, color: 'var(--navy)', wordBreak: 'break-all', fontFamily: 'monospace' } }, withdrawResult.tx_hash),
+            ),
+            React.createElement(Button, { fullWidth: true, onClick: () => setShowWithdraw(false) }, 'Done'),
+          ),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // REFER TAB
+    // ========================================================================
+
+    function ReferTab() {
+      const { fetchWithAuth } = useAuth();
+      const toast = useToast();
+      const [data, setData] = useState(null);
+      const [shareData, setShareData] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        Promise.all([
+          fetchWithAuth('referrals'),
+          fetchWithAuth('referrals/share'),
+        ]).then(([refs, share]) => {
+          setData(refs);
+          setShareData(share);
+        }).catch(err => toast.error(err.message))
+          .finally(() => setLoading(false));
+      }, [fetchWithAuth, toast]);
+
+      const copyCode = () => {
+        if (!data) return;
+        navigator.clipboard.writeText(data.referral_code).then(() => toast.success('Referral code copied!'));
+      };
+
+      const shareMessage = () => {
+        if (!shareData) return;
+        if (navigator.share) {
+          navigator.share({ text: shareData.message }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(shareData.message).then(() => toast.success('Message copied to clipboard!'));
+        }
+      };
+
+      if (loading) {
+        return React.createElement('div', { style: { padding: 20 } },
+          React.createElement('div', { className: 'skeleton', style: { height: 180, marginBottom: 16 } }),
+          React.createElement('div', { className: 'skeleton', style: { height: 200 } }),
+        );
+      }
+
+      if (!data) return React.createElement(EmptyState, { icon: 'users', title: 'Could not load referrals' });
+
+      return React.createElement('div', { className: 'animate-fade', style: { padding: '0 16px 16px' } },
+        // Hero
+        React.createElement('div', {
+          style: {
+            background: 'linear-gradient(135deg, #0D1B2A 0%, #1B3050 100%)',
+            borderRadius: 20, padding: 24, color: 'white', textAlign: 'center', marginBottom: 16,
+          },
+        },
+          React.createElement(Icon, { name: 'gift', size: 36, color: 'var(--orange)', style: { display: 'block', margin: '0 auto 12px' } }),
+          React.createElement('div', { style: { fontSize: 20, fontWeight: 800, marginBottom: 4 } }, 'Earn 5,000 sats'),
+          React.createElement('div', { style: { fontSize: 14, color: 'rgba(255,255,255,0.55)' } }, 'for every friend who joins and subscribes'),
+        ),
+
+        // Referral code
+        React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('div', { style: { fontSize: 13, fontWeight: 500, color: 'var(--gray-500)', marginBottom: 8 } }, 'Your Referral Code'),
+          React.createElement('div', {
+            onClick: copyCode,
+            style: {
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+              padding: '16px 20px', background: 'var(--gray-50)', borderRadius: 12,
+              border: '2px dashed var(--orange)', cursor: 'pointer', marginBottom: 12,
+            },
+          },
+            React.createElement('span', {
+              style: { fontSize: 24, fontWeight: 800, color: 'var(--orange)', letterSpacing: '0.08em' },
+            }, data.referral_code),
+            React.createElement(Icon, { name: 'copy', size: 20, color: 'var(--orange)' }),
+          ),
+          React.createElement(Button, { fullWidth: true, onClick: shareMessage },
+            React.createElement(Icon, { name: 'share', size: 18, color: 'white' }),
+            'Share Invite Link',
+          ),
+        ),
+
+        // Stats
+        React.createElement('div', { style: { display: 'flex', gap: 12, marginBottom: 16 } },
+          React.createElement(Card, { style: { flex: 1, textAlign: 'center', padding: 16 } },
+            React.createElement('div', { style: { fontSize: 24, fontWeight: 800, color: 'var(--orange)' } }, data.total_referrals),
+            React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-500)' } }, 'Referrals'),
+          ),
+          React.createElement(Card, { style: { flex: 1, textAlign: 'center', padding: 16 } },
+            React.createElement('div', { style: { fontSize: 24, fontWeight: 800, color: 'var(--green)' } }, formatSats(data.total_earned_sats)),
+            React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-500)' } }, 'Sats Earned'),
+          ),
+        ),
+
+        // Referral list
+        React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Your Referrals'),
+
+        data.referrals.length === 0
+          ? React.createElement(EmptyState, {
+            icon: 'users',
+            title: 'No referrals yet',
+            subtitle: 'Share your code and earn sats when friends join!',
+          })
+          : data.referrals.map(ref =>
+            React.createElement(Card, {
+              key: ref.id,
+              style: { display: 'flex', alignItems: 'center', gap: 12, padding: 14, marginBottom: 8 },
+            },
+              React.createElement('div', {
+                style: {
+                  width: 40, height: 40, borderRadius: '50%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  background: ref.status === 'qualified' ? 'var(--green-light)' : 'var(--gray-100)',
+                  fontSize: 16, fontWeight: 700,
+                  color: ref.status === 'qualified' ? 'var(--green)' : 'var(--gray-400)',
+                },
+              }, (ref.referred_name || '?')[0].toUpperCase()),
+              React.createElement('div', { style: { flex: 1 } },
+                React.createElement('div', { style: { fontSize: 14, fontWeight: 600, color: 'var(--navy)' } }, ref.referred_name || 'User'),
+                React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-400)' } }, formatDate(ref.created_at)),
+              ),
+              React.createElement('div', { style: { textAlign: 'right', flexShrink: 0 } },
+                React.createElement('div', {
+                  style: {
+                    fontSize: 12, fontWeight: 600, padding: '3px 10px', borderRadius: 12,
+                    background: ref.status === 'qualified' ? 'var(--green-light)' : 'var(--gray-100)',
+                    color: ref.status === 'qualified' ? 'var(--green)' : 'var(--gray-500)',
+                    marginBottom: 2, display: 'inline-block',
+                  },
+                }, ref.status === 'qualified' ? 'Qualified' : 'Pending'),
+                ref.referrer_sats > 0 && React.createElement('div', {
+                  style: { fontSize: 13, fontWeight: 700, color: 'var(--green)' },
+                }, '+', formatSats(ref.referrer_sats)),
+              ),
+            ),
+          ),
+      );
+    }
+
+    // ========================================================================
+    // ACCOUNT TAB
+    // ========================================================================
+
+    function AccountTab() {
+      const { user, fetchWithAuth, logout, refreshUser, setUser } = useAuth();
+      const toast = useToast();
+      const [editMode, setEditMode] = useState(false);
+      const [name, setName] = useState(user?.name || '');
+      const [email, setEmail] = useState(user?.email || '');
+      const [phone, setPhone] = useState(user?.phone || '');
+      const [saving, setSaving] = useState(false);
+      const [plans, setPlans] = useState(null);
+      const [billing, setBilling] = useState(null);
+      const [invoices, setInvoices] = useState([]);
+      const [showChangePlan, setShowChangePlan] = useState(false);
+      const [changingPlan, setChangingPlan] = useState(false);
+      const [cancellingPlan, setCancellingPlan] = useState(false);
+      const [showCancel, setShowCancel] = useState(false);
+      const [notifEnabled, setNotifEnabled] = useState(true);
+      const [autoPayEnabled, setAutoPayEnabled] = useState(true);
+
+      useEffect(() => {
+        Promise.all([
+          fetchWithAuth('plans'),
+          fetchWithAuth('billing/upcoming'),
+          fetchWithAuth('billing/invoices'),
+        ]).then(([p, b, i]) => {
+          setPlans(p.plans);
+          setBilling(b.upcoming);
+          setInvoices(i.invoices || []);
+        }).catch(() => {});
+      }, [fetchWithAuth]);
+
+      useEffect(() => {
+        if (user) {
+          setName(user.name || '');
+          setEmail(user.email || '');
+          setPhone(user.phone || '');
+        }
+      }, [user]);
+
+      const saveProfile = async () => {
+        setSaving(true);
+        try {
+          const res = await fetchWithAuth('user/profile', {
+            method: 'PUT',
+            body: JSON.stringify({ name, email, phone }),
+          });
+          setUser(res.user);
+          setEditMode(false);
+          toast.success('Profile updated');
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setSaving(false);
+        }
+      };
+
+      const subscribePlan = async (plan) => {
+        setChangingPlan(true);
+        try {
+          if (user.plan === 'none' || user.plan_status !== 'active') {
+            const res = await fetchWithAuth('plans/subscribe', {
+              method: 'POST',
+              body: JSON.stringify({ plan }),
+            });
+            setUser(res.user);
+            toast.success(res.message);
+          } else {
+            const res = await fetchWithAuth('plans/change', {
+              method: 'PUT',
+              body: JSON.stringify({ plan }),
+            });
+            setUser(res.user);
+            toast.success(res.message);
+          }
+          setShowChangePlan(false);
+          await refreshUser();
+          // Reload billing
+          const b = await fetchWithAuth('billing/upcoming');
+          setBilling(b.upcoming);
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setChangingPlan(false);
+        }
+      };
+
+      const cancelPlan = async () => {
+        setCancellingPlan(true);
+        try {
+          const res = await fetchWithAuth('plans/cancel', { method: 'POST' });
+          setUser(res.user);
+          toast.success(res.message);
+          setShowCancel(false);
+        } catch (err) {
+          toast.error(err.message);
+        } finally {
+          setCancellingPlan(false);
+        }
+      };
+
+      if (!user) return null;
+
+      const hasPlan = user.plan !== 'none' && user.plan_status === 'active';
+      const currentPlanInfo = plans && plans[user.plan];
+
+      return React.createElement('div', { className: 'animate-fade', style: { padding: '0 16px 16px' } },
+        // Profile section
+        React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('div', {
+            style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+          },
+            React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)' } }, 'Profile'),
+            !editMode && React.createElement('button', {
+              onClick: () => setEditMode(true),
+              style: {
+                background: 'var(--gray-100)', border: 'none', borderRadius: 8,
+                padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center',
+                gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--gray-600)',
+              },
+            },
+              React.createElement(Icon, { name: 'edit', size: 14, color: 'var(--gray-600)' }),
+              'Edit',
+            ),
+          ),
+
+          editMode ? React.createElement('div', null,
+            React.createElement(Input, { label: 'Name', value: name, onChange: setName }),
+            React.createElement(Input, { label: 'Email', type: 'email', value: email, onChange: setEmail }),
+            React.createElement(Input, { label: 'Phone', value: phone, onChange: setPhone, placeholder: '+1-555-555-5555' }),
+            React.createElement('div', { style: { display: 'flex', gap: 12 } },
+              React.createElement(Button, { fullWidth: true, variant: 'outline', onClick: () => setEditMode(false) }, 'Cancel'),
+              React.createElement(Button, { fullWidth: true, loading: saving, onClick: saveProfile }, 'Save'),
+            ),
+          ) : React.createElement('div', null,
+            // Avatar
+            React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 } },
+              React.createElement('div', {
+                style: {
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, var(--orange), #E67E22)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20, fontWeight: 800, color: 'white', flexShrink: 0,
+                },
+              }, (user.name || 'U')[0].toUpperCase()),
+              React.createElement('div', null,
+                React.createElement('div', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)' } }, user.name),
+                React.createElement('div', { style: { fontSize: 13, color: 'var(--gray-500)' } }, user.email),
+                user.phone && React.createElement('div', { style: { fontSize: 13, color: 'var(--gray-400)' } }, user.phone),
+              ),
+            ),
+          ),
+        ),
+
+        // Plan management
+        React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Plan'),
+
+          hasPlan && currentPlanInfo ? React.createElement('div', null,
+            React.createElement('div', {
+              style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+            },
+              React.createElement('div', null,
+                React.createElement('span', {
+                  style: {
+                    display: 'inline-block', padding: '4px 12px', borderRadius: 20,
+                    background: user.plan === 'pro' ? '#FEF3C7' : 'var(--blue-light)',
+                    color: user.plan === 'pro' ? '#92400E' : 'var(--blue)',
+                    fontSize: 12, fontWeight: 700, marginBottom: 4,
+                  },
+                }, currentPlanInfo.name),
+                React.createElement('div', { style: { fontSize: 22, fontWeight: 800, color: 'var(--navy)' } },
+                  '$', currentPlanInfo.price,
+                  React.createElement('span', { style: { fontSize: 14, fontWeight: 400, color: 'var(--gray-400)' } }, '/mo'),
+                ),
+              ),
+              React.createElement('div', { style: { textAlign: 'right' } },
+                React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-400)' } }, 'Cashback'),
+                React.createElement('div', { style: { fontSize: 16, fontWeight: 700, color: 'var(--green)' } },
+                  currentPlanInfo.cashback_pct, '%',
+                ),
+              ),
+            ),
+            React.createElement('div', {
+              style: { display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' },
+            },
+              [
+                currentPlanInfo.data_gb + 'GB Data',
+                currentPlanInfo.calls,
+                currentPlanInfo.texts + ' Texts',
+              ].map(f =>
+                React.createElement('span', {
+                  key: f,
+                  style: {
+                    padding: '4px 10px', borderRadius: 8, background: 'var(--gray-100)',
+                    fontSize: 12, fontWeight: 500, color: 'var(--gray-600)',
+                  },
+                }, f),
+              ),
+            ),
+            React.createElement('div', { style: { display: 'flex', gap: 12, marginTop: 12 } },
+              React.createElement(Button, { fullWidth: true, variant: 'outline', size: 'sm', onClick: () => setShowChangePlan(true) }, 'Change Plan'),
+              React.createElement(Button, { fullWidth: true, variant: 'ghost', size: 'sm', onClick: () => setShowCancel(true), style: { color: 'var(--red)' } }, 'Cancel Plan'),
+            ),
+          ) : React.createElement('div', { style: { textAlign: 'center', padding: 16 } },
+            React.createElement('div', { style: { fontSize: 14, color: 'var(--gray-500)', marginBottom: 12 } }, 'No active plan'),
+            React.createElement(Button, { onClick: () => setShowChangePlan(true) }, 'Choose a Plan'),
+          ),
+        ),
+
+        // Billing
+        billing && React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Billing'),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 8 } },
+            React.createElement('span', { style: { fontSize: 14, color: 'var(--gray-500)' } }, 'Next Payment'),
+            React.createElement('span', { style: { fontSize: 14, fontWeight: 600, color: 'var(--navy)' } }, formatDateFull(billing.next_billing_date)),
+          ),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 8 } },
+            React.createElement('span', { style: { fontSize: 14, color: 'var(--gray-500)' } }, 'Amount'),
+            React.createElement('span', { style: { fontSize: 14, fontWeight: 600, color: 'var(--navy)' } }, '$', (billing.amount_cents / 100).toFixed(2)),
+          ),
+          React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 8 } },
+            React.createElement('span', { style: { fontSize: 14, color: 'var(--gray-500)' } }, 'Sats to Earn'),
+            React.createElement('span', { style: { fontSize: 14, fontWeight: 600, color: 'var(--green)' } }, '+', formatSats(billing.sats_to_earn)),
+          ),
+          React.createElement('div', {
+            style: {
+              display: 'flex', justifyContent: 'space-between', paddingTop: 8,
+              borderTop: '1px solid var(--gray-100)',
+            },
+          },
+            React.createElement('span', { style: { fontSize: 14, color: 'var(--gray-500)' } }, 'Payment Method'),
+            React.createElement('span', { style: { fontSize: 13, color: 'var(--gray-400)', fontStyle: 'italic' } }, 'Coming soon'),
+          ),
+        ),
+
+        // Invoice history
+        invoices.length > 0 && React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 12 } }, 'Invoices'),
+          invoices.slice(0, 6).map(inv =>
+            React.createElement('div', {
+              key: inv.id,
+              style: {
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 0', borderBottom: '1px solid var(--gray-100)',
+              },
+            },
+              React.createElement('div', null,
+                React.createElement('div', { style: { fontSize: 14, fontWeight: 500, color: 'var(--navy)' } },
+                  planLabel(inv.plan), ' Plan - ', inv.billing_period,
+                ),
+                React.createElement('div', { style: { fontSize: 12, color: 'var(--gray-400)' } }, formatDate(inv.created_at)),
+              ),
+              React.createElement('div', { style: { textAlign: 'right' } },
+                React.createElement('div', { style: { fontSize: 14, fontWeight: 600, color: 'var(--navy)' } }, '$', (inv.amount_cents / 100).toFixed(2)),
+                React.createElement('span', {
+                  style: {
+                    fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 8,
+                    background: inv.status === 'paid' ? 'var(--green-light)' : 'var(--gray-100)',
+                    color: inv.status === 'paid' ? 'var(--green)' : 'var(--gray-500)',
+                  },
+                }, inv.status === 'paid' ? 'Paid' : inv.status),
+              ),
+            ),
+          ),
+        ),
+
+        // Settings
+        React.createElement(Card, { style: { marginBottom: 16 } },
+          React.createElement('h3', { style: { fontSize: 16, fontWeight: 700, color: 'var(--navy)', marginBottom: 4 } }, 'Settings'),
+          React.createElement(Toggle, { label: 'Push Notifications', checked: notifEnabled, onChange: (v) => { setNotifEnabled(v); toast.info(v ? 'Notifications enabled' : 'Notifications disabled'); } }),
+          React.createElement('div', { style: { borderTop: '1px solid var(--gray-100)' } }),
+          React.createElement(Toggle, { label: 'Auto-pay', checked: autoPayEnabled, onChange: (v) => { setAutoPayEnabled(v); toast.info(v ? 'Auto-pay enabled' : 'Auto-pay disabled'); } }),
+        ),
+
+        // Sign out
+        React.createElement(Button, {
+          fullWidth: true, variant: 'ghost',
+          onClick: logout,
+          style: { color: 'var(--red)', marginBottom: 24 },
+        },
+          React.createElement(Icon, { name: 'logout', size: 18, color: 'var(--red)' }),
+          'Sign Out',
+        ),
+
+        // Change Plan Modal
+        React.createElement(Modal, {
+          open: showChangePlan,
+          onClose: () => setShowChangePlan(false),
+          title: 'Choose Your Plan',
+        },
+          plans && Object.entries(plans).map(([key, plan]) => {
+            const isCurrent = user.plan === key && user.plan_status === 'active';
+            return React.createElement(Card, {
+              key: key,
+              style: {
+                marginBottom: 12, border: `2px solid ${isCurrent ? 'var(--orange)' : 'var(--gray-200)'}`,
+                position: 'relative', overflow: 'hidden',
+              },
+            },
+              isCurrent && React.createElement('div', {
+                style: {
+                  position: 'absolute', top: 0, right: 0, padding: '4px 12px',
+                  background: 'var(--orange)', color: 'white', fontSize: 11,
+                  fontWeight: 700, borderRadius: '0 0 0 8px',
+                },
+              }, 'CURRENT'),
+              React.createElement('div', {
+                style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+              },
+                React.createElement('div', null,
+                  React.createElement('div', { style: { fontSize: 18, fontWeight: 800, color: 'var(--navy)' } }, plan.name),
+                  React.createElement('div', { style: { fontSize: 24, fontWeight: 800, color: 'var(--navy)' } },
+                    '$', plan.price,
+                    React.createElement('span', { style: { fontSize: 14, fontWeight: 400, color: 'var(--gray-400)' } }, '/mo'),
+                  ),
+                ),
+                React.createElement('div', {
+                  style: {
+                    padding: '6px 14px', borderRadius: 20,
+                    background: key === 'pro' ? '#FEF3C7' : 'var(--blue-light)',
+                    color: key === 'pro' ? '#92400E' : 'var(--blue)',
+                    fontSize: 13, fontWeight: 700,
+                  },
+                }, plan.cashback_pct, '% cashback'),
+              ),
+              React.createElement('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 } },
+                [plan.data_gb + 'GB Data', plan.calls + ' Calls', plan.texts + ' Texts', formatSats(plan.sats_per_month) + ' sats/mo'].map(f =>
+                  React.createElement('span', {
+                    key: f,
+                    style: { padding: '4px 10px', borderRadius: 8, background: 'var(--gray-100)', fontSize: 12, color: 'var(--gray-600)' },
+                  }, f),
+                ),
+              ),
+              React.createElement(Button, {
+                fullWidth: true,
+                variant: isCurrent ? 'outline' : 'primary',
+                disabled: isCurrent || changingPlan,
+                loading: changingPlan,
+                onClick: () => subscribePlan(key),
+                size: 'sm',
+              }, isCurrent ? 'Current Plan' : 'Select ' + plan.name),
+            );
+          }),
+        ),
+
+        // Cancel Plan Modal
+        React.createElement(Modal, {
+          open: showCancel,
+          onClose: () => setShowCancel(false),
+          title: 'Cancel Plan',
+        },
+          React.createElement('div', { style: { textAlign: 'center', marginBottom: 20 } },
+            React.createElement(Icon, { name: 'shield', size: 40, color: 'var(--red)', style: { display: 'block', margin: '0 auto 12px' } }),
+            React.createElement('div', { style: { fontSize: 16, fontWeight: 600, color: 'var(--navy)', marginBottom: 4 } }, 'Are you sure?'),
+            React.createElement('div', { style: { fontSize: 14, color: 'var(--gray-500)', lineHeight: 1.5 } },
+              'You will lose your monthly cashback and your sats balance will be available for withdrawal for 90 days.',
+            ),
+          ),
+          React.createElement('div', { style: { display: 'flex', gap: 12 } },
+            React.createElement(Button, { fullWidth: true, variant: 'outline', onClick: () => setShowCancel(false) }, 'Keep Plan'),
+            React.createElement(Button, { fullWidth: true, variant: 'danger', loading: cancellingPlan, onClick: cancelPlan }, 'Cancel Plan'),
+          ),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // Main App Shell
+    // ========================================================================
+
+    function AppShell() {
+      const [tab, setTab] = useState('home');
+
+      const tabs = [
+        { id: 'home', label: 'Home', icon: 'home' },
+        { id: 'wallet', label: 'Wallet', icon: 'bitcoin' },
+        { id: 'refer', label: 'Refer', icon: 'users' },
+        { id: 'account', label: 'Account', icon: 'user' },
+      ];
+
+      const tabContent = {
+        home: React.createElement(HomeTab, { key: 'home' }),
+        wallet: React.createElement(WalletTab, { key: 'wallet' }),
+        refer: React.createElement(ReferTab, { key: 'refer' }),
+        account: React.createElement(AccountTab, { key: 'account' }),
+      };
+
+      return React.createElement('div', {
+        style: { height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--gray-50)' },
+      },
+        // Header
+        React.createElement('div', {
+          style: {
+            background: 'var(--navy)', padding: '12px 16px',
+            paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))',
+            display: 'flex', alignItems: 'center', gap: 10,
+          },
+        },
+          React.createElement(BitcoinLogo, { size: 28 }),
+          React.createElement('span', { style: { fontSize: 16, fontWeight: 700, color: 'white' } }, 'Bitcoin Agentic'),
+        ),
+
+        // Content area
+        React.createElement('div', {
+          style: {
+            flex: 1, overflow: 'auto', WebkitOverflowScrolling: 'touch',
+            paddingTop: 16,
+            paddingBottom: 'calc(var(--tab-height) + var(--safe-bottom) + 16px)',
+          },
+        }, tabContent[tab]),
+
+        // Bottom tab bar
+        React.createElement('div', {
+          style: {
+            position: 'fixed', bottom: 0, left: 0, right: 0,
+            height: 'calc(var(--tab-height) + var(--safe-bottom))',
+            paddingBottom: 'var(--safe-bottom)',
+            background: 'white',
+            borderTop: '1px solid var(--gray-200)',
+            display: 'flex',
+            zIndex: 100,
+          },
+        },
+          tabs.map(t =>
+            React.createElement('button', {
+              key: t.id,
+              onClick: () => setTab(t.id),
+              style: {
+                flex: 1, display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: 2,
+                border: 'none', background: 'none', cursor: 'pointer',
+                padding: '8px 0', minHeight: 48,
+                color: tab === t.id ? 'var(--orange)' : 'var(--gray-400)',
+                transition: 'color 0.15s',
+              },
+            },
+              React.createElement(Icon, {
+                name: t.icon, size: 22,
+                color: tab === t.id ? 'var(--orange)' : 'var(--gray-400)',
+              }),
+              React.createElement('span', {
+                style: { fontSize: 11, fontWeight: tab === t.id ? 700 : 500 },
+              }, t.label),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // ========================================================================
+    // Root App
+    // ========================================================================
+
+    function App() {
+      const { user, loading } = useAuth();
+
+      if (loading) return React.createElement(LoadingScreen);
+      if (!user) return React.createElement(AuthScreen);
+      return React.createElement(AppShell);
+    }
+
+    // ========================================================================
+    // Mount
+    // ========================================================================
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(
+      React.createElement(AuthProvider, null,
+        React.createElement(ToastProvider, null,
+          React.createElement(App),
+        ),
+      ),
+    );
+  </script>
+</body>
+</html>

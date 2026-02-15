@@ -1,0 +1,17 @@
+{
+  "name": "bitcoinagentic",
+  "version": "2.0.0",
+  "description": "Bitcoin Agentic - The world's first Bitcoin-native mobile carrier, v2",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.4.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.0"
+  }
+}
