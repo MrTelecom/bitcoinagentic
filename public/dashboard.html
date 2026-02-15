@@ -478,7 +478,14 @@
       );
     }
 
+    const EMPTY_STATE_IMAGES = {
+      wallet: 'img/empty-wallet.png',
+      clock: 'img/empty-wallet.png',
+      users: 'img/empty-referrals.png',
+    };
+
     function EmptyState({ icon, title, subtitle, action }) {
+      const imgSrc = EMPTY_STATE_IMAGES[icon];
       return React.createElement('div', {
         className: 'animate-fade',
         style: {
@@ -486,12 +493,18 @@
           justifyContent: 'center', padding: '40px 24px', textAlign: 'center',
         },
       },
-        React.createElement('div', {
-          style: {
-            width: 64, height: 64, borderRadius: '50%', background: 'var(--gray-100)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
-          },
-        }, React.createElement(Icon, { name: icon, size: 28, color: 'var(--gray-400)' })),
+        imgSrc
+          ? React.createElement('img', {
+              src: imgSrc, alt: title,
+              style: { width: 120, height: 120, objectFit: 'contain', marginBottom: 16, opacity: 0.85 },
+              onError: function(e) { e.target.style.display = 'none'; },
+            })
+          : React.createElement('div', {
+              style: {
+                width: 64, height: 64, borderRadius: '50%', background: 'var(--gray-100)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+              },
+            }, React.createElement(Icon, { name: icon, size: 28, color: 'var(--gray-400)' })),
         React.createElement('div', { style: { fontSize: 16, fontWeight: 600, color: 'var(--gray-700)', marginBottom: 4 } }, title),
         subtitle && React.createElement('div', { style: { fontSize: 14, color: 'var(--gray-500)', maxWidth: 280, lineHeight: 1.5 } }, subtitle),
         action && React.createElement('div', { style: { marginTop: 16 } }, action),
@@ -777,15 +790,24 @@
     function BalanceCard({ satsBalance, satsUsd, compact }) {
       return React.createElement('div', {
         style: {
-          background: 'linear-gradient(135deg, #0D1B2A 0%, #162640 50%, #1E3A5F 100%)',
-          borderRadius: 20, padding: compact ? '20px 20px' : '24px 24px 28px',
+          background: 'linear-gradient(135deg, #0D1B2A 0%, #162640 40%, #1E3A5F 70%, #1B3050 100%)',
+          borderRadius: 20, padding: compact ? '20px 20px' : '28px 24px 32px',
           color: 'white', position: 'relative', overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(13, 27, 42, 0.4)',
         },
       },
+        // Orange glow accent
+        React.createElement('div', {
+          style: {
+            position: 'absolute', top: '-40%', right: '-20%', width: 200, height: 200,
+            background: 'radial-gradient(circle, rgba(247, 147, 26, 0.12) 0%, transparent 70%)',
+            borderRadius: '50%', pointerEvents: 'none',
+          },
+        }),
         // Background decoration
         React.createElement('div', {
           style: {
-            position: 'absolute', right: -20, top: -20, opacity: 0.06,
+            position: 'absolute', right: -20, top: -20, opacity: 0.08,
           },
         }, React.createElement(BitcoinLogo, { size: compact ? 120 : 160, color: '#F7931A' })),
 

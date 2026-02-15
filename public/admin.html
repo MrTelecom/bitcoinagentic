@@ -66,7 +66,7 @@
     /* SIDEBAR */
     .sidebar {
       width: var(--sidebar-w);
-      background: var(--navy);
+      background: linear-gradient(180deg, #0D1B2A 0%, #0A1520 100%);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -160,6 +160,12 @@
       border-radius: var(--radius);
       padding: 20px;
       box-shadow: var(--shadow);
+      border-top: 3px solid var(--orange);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
     .stat-card-label { font-size: 13px; color: var(--gray); font-weight: 500; margin-bottom: 4px; }
     .stat-card-value { font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1.2; }

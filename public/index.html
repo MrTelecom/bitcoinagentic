@@ -5,22 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bitcoin Agentic - Your Phone Bill Earns Bitcoin</title>
 <meta name="description" content="The world's first Bitcoin-native mobile carrier. Your phone plan pays you back in satoshis every month. Powered by World Mobile.">
+<meta property="og:title" content="Bitcoin Agentic - Your Phone Bill Earns Bitcoin">
+<meta property="og:description" content="The mobile plan that pays you back in satoshis every month. Starting at $15/mo.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ===== RESET & BASE ===== */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
-
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #1a1a2e;
@@ -29,9 +25,9 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* ===== CSS VARIABLES ===== */
 :root {
   --orange: #F7931A;
   --orange-dark: #e07f0e;
@@ -47,68 +43,81 @@ body {
   --gray-600: #4a5568;
   --gray-800: #2d3748;
   --radius: 12px;
-  --radius-lg: 16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
-  --shadow-xl: 0 16px 48px rgba(0,0,0,0.16);
-  --max-width: 1140px;
-  --transition: 0.2s ease;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.16);
+  --max-width: 1200px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-img, svg {
-  display: block;
-  max-width: 100%;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+h1, h2, h3, h4, h5, h6 { text-rendering: optimizeLegibility; }
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes floatPhone {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(247, 147, 26, 0.3); }
+  50% { box-shadow: 0 0 0 14px rgba(247, 147, 26, 0); }
+}
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(247, 147, 26, 0.3); }
-  50% { box-shadow: 0 0 0 12px rgba(247, 147, 26, 0); }
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 .animate-on-scroll.visible {
   opacity: 1;
   transform: translateY(0);
+}
+.animate-on-scroll.from-left {
+  transform: translateX(-40px);
+}
+.animate-on-scroll.from-left.visible {
+  transform: translateX(0);
+}
+.animate-on-scroll.from-right {
+  transform: translateX(40px);
+}
+.animate-on-scroll.from-right.visible {
+  transform: translateX(0);
+}
+.animate-on-scroll.scale-in {
+  transform: scale(0.95);
+}
+.animate-on-scroll.scale-in.visible {
+  transform: scale(1);
 }
 
 /* ===== NAVIGATION ===== */
@@ -118,13 +127,12 @@ button {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(13, 27, 42, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(13, 27, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   transition: background var(--transition);
 }
-
 .nav-inner {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -134,7 +142,6 @@ button {
   justify-content: space-between;
   height: 64px;
 }
-
 .nav-logo {
   display: flex;
   align-items: center;
@@ -144,20 +151,13 @@ button {
   color: var(--white);
   z-index: 1001;
 }
-
-.nav-logo svg {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
+.nav-logo svg { width: 28px; height: 28px; flex-shrink: 0; }
 .nav-links {
   display: flex;
   align-items: center;
   gap: 32px;
   list-style: none;
 }
-
 .nav-links a {
   font-size: 14px;
   font-weight: 500;
@@ -167,23 +167,18 @@ button {
   display: flex;
   align-items: center;
 }
-
-.nav-links a:hover {
-  color: var(--white);
-}
-
+.nav-links a:hover { color: var(--white); }
 .nav-cta {
   background: var(--orange);
   color: var(--white) !important;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 10px 22px;
+  border-radius: 10px;
   font-weight: 600;
-  transition: background var(--transition), transform var(--transition);
+  transition: all var(--transition);
   min-height: 48px;
   display: inline-flex !important;
   align-items: center;
 }
-
 .nav-cta:hover {
   background: var(--orange-dark);
   transform: translateY(-1px);
@@ -201,7 +196,6 @@ button {
   z-index: 1001;
   cursor: pointer;
 }
-
 .hamburger span {
   display: block;
   width: 24px;
@@ -210,42 +204,16 @@ button {
   border-radius: 2px;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
-
-#mobile-toggle {
-  display: none;
-}
-
-#mobile-toggle:checked ~ .hamburger span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-
-#mobile-toggle:checked ~ .hamburger span:nth-child(2) {
-  opacity: 0;
-}
-
-#mobile-toggle:checked ~ .hamburger span:nth-child(3) {
-  transform: rotate(-45deg) translate(5px, -5px);
-}
-
-#mobile-toggle:checked ~ .mobile-menu {
-  transform: translateX(0);
-  opacity: 1;
-  pointer-events: all;
-}
-
-.mobile-menu {
-  display: none;
-}
+#mobile-toggle { display: none; }
+#mobile-toggle:checked ~ .hamburger span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+#mobile-toggle:checked ~ .hamburger span:nth-child(2) { opacity: 0; }
+#mobile-toggle:checked ~ .hamburger span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+#mobile-toggle:checked ~ .mobile-menu { transform: translateX(0); opacity: 1; pointer-events: all; }
+.mobile-menu { display: none; }
 
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
   .mobile-menu {
     display: flex;
     flex-direction: column;
@@ -263,7 +231,6 @@ button {
     transition: transform 0.35s ease, opacity 0.35s ease;
     z-index: 999;
   }
-
   .mobile-menu a {
     font-size: 20px;
     font-weight: 600;
@@ -274,7 +241,6 @@ button {
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,0.06);
   }
-
   .mobile-menu .mobile-cta {
     margin-top: 24px;
     background: var(--orange);
@@ -293,61 +259,62 @@ button {
 .hero {
   position: relative;
   background: var(--navy);
-  padding: 140px 24px 100px;
+  padding: 120px 24px 80px;
   overflow: hidden;
-  min-height: 90vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
 }
-
 .hero::before {
   content: '';
   position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(247, 147, 26, 0.12) 0%, transparent 70%);
+  top: -30%;
+  right: -10%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(247, 147, 26, 0.12) 0%, transparent 65%);
   border-radius: 50%;
   pointer-events: none;
 }
-
 .hero::after {
   content: '';
   position: absolute;
-  bottom: -30%;
-  left: -10%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(247, 147, 26, 0.06) 0%, transparent 70%);
+  bottom: -20%;
+  left: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(247, 147, 26, 0.06) 0%, transparent 65%);
   border-radius: 50%;
   pointer-events: none;
 }
-
 .hero-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
   background-size: 64px 64px;
   pointer-events: none;
 }
-
 .hero-inner {
   max-width: var(--max-width);
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
 }
-
+.hero-content {
+  text-align: left;
+}
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(247, 147, 26, 0.1);
-  border: 1px solid rgba(247, 147, 26, 0.25);
+  background: rgba(247, 147, 26, 0.12);
+  border: 1px solid rgba(247, 147, 26, 0.3);
   border-radius: 100px;
   padding: 8px 20px;
   font-size: 13px;
@@ -356,47 +323,100 @@ button {
   margin-bottom: 32px;
   animation: fadeUp 0.6s ease both;
 }
-
-.hero-badge svg {
-  width: 16px;
-  height: 16px;
-}
-
+.hero-badge svg { width: 16px; height: 16px; }
 .hero h1 {
-  font-size: clamp(36px, 7vw, 72px);
-  font-weight: 800;
+  font-size: clamp(38px, 5.5vw, 68px);
+  font-weight: 900;
   color: var(--white);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
   margin-bottom: 24px;
   animation: fadeUp 0.6s ease 0.1s both;
 }
-
 .hero h1 .gradient-text {
   background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .hero-sub {
-  font-size: clamp(16px, 2.5vw, 20px);
-  color: rgba(255,255,255,0.6);
-  max-width: 560px;
-  margin: 0 auto 40px;
-  line-height: 1.6;
+  font-size: clamp(17px, 2vw, 20px);
+  color: rgba(255,255,255,0.55);
+  max-width: 480px;
+  line-height: 1.65;
   animation: fadeUp 0.6s ease 0.2s both;
 }
-
 .hero-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
+  margin-top: 40px;
   animation: fadeUp 0.6s ease 0.3s both;
 }
+.hero-image {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeLeft 0.8s ease 0.3s both;
+}
+.hero-image img {
+  max-width: 520px;
+  width: 100%;
+  height: auto;
+  animation: floatPhone 6s ease-in-out infinite;
+  filter: drop-shadow(0 24px 64px rgba(247, 147, 26, 0.2));
+  border-radius: 12px;
+}
+.hero-image::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(247, 147, 26, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+.hero-trust {
+  margin-top: 48px;
+  animation: fadeUp 0.6s ease 0.4s both;
+}
+.hero-trust p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.hero-trust-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.6);
+  font-size: 15px;
+  font-weight: 600;
+}
+.hero-trust-logo img {
+  width: 28px;
+  height: 28px;
+  opacity: 0.7;
+}
 
+@media (max-width: 768px) {
+  .hero { padding: 100px 24px 60px; min-height: auto; }
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+  .hero-content { text-align: center; }
+  .hero-sub { margin: 0 auto; }
+  .hero-actions { justify-content: center; }
+  .hero-trust { text-align: center; }
+  .hero-image { order: -1; }
+  .hero-image img { max-width: 320px; }
+}
+
+/* ===== BUTTONS ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -404,89 +424,80 @@ button {
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  padding: 14px 32px;
-  border-radius: 10px;
+  padding: 15px 32px;
+  border-radius: 12px;
   min-height: 52px;
   min-width: 48px;
   transition: all var(--transition);
   cursor: pointer;
 }
-
+.btn:active { transform: scale(0.97); }
 .btn-primary {
   background: var(--orange);
   color: var(--white);
-  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.3);
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.3);
 }
-
 .btn-primary:hover {
   background: var(--orange-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.4);
+  box-shadow: 0 8px 32px rgba(247, 147, 26, 0.4);
 }
-
 .btn-secondary {
   background: rgba(255,255,255,0.08);
   color: var(--white);
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
 }
-
 .btn-secondary:hover {
   background: rgba(255,255,255,0.14);
   transform: translateY(-2px);
 }
 
-.hero-trust {
-  margin-top: 56px;
-  animation: fadeUp 0.6s ease 0.4s both;
+/* ===== TRUST BAR ===== */
+.trust-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 20px 24px;
 }
-
-.hero-trust p {
-  font-size: 13px;
-  color: rgba(255,255,255,0.35);
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-}
-
-.hero-trust-logo {
-  display: inline-flex;
+.trust-bar-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,0.5);
-  font-size: 16px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
 }
-
-.hero-trust-logo svg {
-  width: 24px;
-  height: 24px;
+.trust-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+.trust-bar-item svg {
+  width: 20px;
+  height: 20px;
+  color: var(--orange);
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .trust-bar-inner { gap: 24px; }
+  .trust-bar-item { font-size: 13px; }
 }
 
 /* ===== SECTION COMMON ===== */
-.section {
-  padding: 96px 24px;
-}
-
-.section-dark {
-  background: var(--navy);
-  color: var(--white);
-}
-
-.section-light {
-  background: var(--white);
-}
-
-.section-alt {
-  background: var(--gray-50);
-}
-
+.section { padding: 100px 24px; }
+.section-tight { padding: 72px 24px; }
+.section-spacious { padding: 120px 24px; }
+.section-dark { background: var(--navy); color: var(--white); }
+.section-light { background: var(--white); }
+.section-alt { background: var(--gray-50); }
 .section-header {
   text-align: center;
   max-width: 640px;
-  margin: 0 auto 64px;
+  margin: 0 auto 72px;
 }
-
 .section-label {
   display: inline-block;
   font-size: 13px;
@@ -496,24 +507,19 @@ button {
   color: var(--orange);
   margin-bottom: 16px;
 }
-
 .section-title {
-  font-size: clamp(28px, 4vw, 44px);
+  font-size: clamp(30px, 4.5vw, 48px);
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   margin-bottom: 16px;
 }
-
 .section-desc {
   font-size: 17px;
   color: var(--gray-600);
   line-height: 1.7;
 }
-
-.section-dark .section-desc {
-  color: rgba(255,255,255,0.5);
-}
+.section-dark .section-desc { color: rgba(255,255,255,0.5); }
 
 /* ===== HOW IT WORKS ===== */
 .steps-grid {
@@ -521,45 +527,38 @@ button {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  gap: 40px;
   position: relative;
 }
-
 .steps-grid::before {
   content: '';
   position: absolute;
-  top: 56px;
-  left: 20%;
-  right: 20%;
+  top: 140px;
+  left: 18%;
+  right: 18%;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--orange), transparent);
   opacity: 0.2;
 }
-
 .step-card {
   text-align: center;
   position: relative;
-  padding: 0 16px;
+  padding: 0 12px;
 }
-
-.step-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(247, 147, 26, 0.1), rgba(247, 147, 26, 0.05));
-  border: 1px solid rgba(247, 147, 26, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
+.step-image {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 28px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(247, 147, 26, 0.06), rgba(247, 147, 26, 0.02));
 }
-
-.step-icon svg {
-  width: 36px;
-  height: 36px;
-  color: var(--orange);
+.step-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
 }
-
 .step-num {
   font-size: 13px;
   font-weight: 700;
@@ -567,105 +566,150 @@ button {
   margin-bottom: 8px;
   letter-spacing: 0.04em;
 }
-
 .step-card h3 {
   font-size: 20px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
-
 .step-card p {
   font-size: 15px;
   color: var(--gray-600);
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 @media (max-width: 768px) {
-  .steps-grid {
-    grid-template-columns: 1fr;
-    gap: 48px;
-    max-width: 400px;
-  }
+  .steps-grid { grid-template-columns: 1fr; gap: 56px; max-width: 400px; }
+  .steps-grid::before { display: none; }
+  .step-image { width: 180px; height: 180px; }
+}
 
-  .steps-grid::before {
-    display: none;
-  }
+/* ===== STATS / SOCIAL PROOF ===== */
+.stats-section {
+  position: relative;
+  overflow: hidden;
+}
+.stats-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+.stats-overlay {
+  position: relative;
+  z-index: 1;
+  background: rgba(13, 27, 42, 0.88);
+  backdrop-filter: blur(4px);
+  padding: 80px 24px;
+}
+.stats-grid {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  text-align: center;
+}
+.stat-number {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 900;
+  color: var(--orange);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.stat-label {
+  font-size: 15px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 8px;
+  font-weight: 500;
+}
+@media (max-width: 640px) {
+  .stats-grid { grid-template-columns: 1fr; gap: 40px; }
+  .stats-overlay { padding: 64px 24px; }
 }
 
 /* ===== PLANS ===== */
+.plans-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.plans-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  opacity: 0.06;
+}
+.plans-content {
+  position: relative;
+  z-index: 1;
+}
 .plans-grid {
-  max-width: 800px;
+  max-width: 840px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 28px;
   align-items: start;
 }
-
 .plan-card {
   background: var(--white);
   border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg);
-  padding: 40px 32px;
+  border-radius: var(--radius-xl);
+  padding: 44px 36px;
   position: relative;
   transition: transform var(--transition), box-shadow var(--transition);
 }
-
 .plan-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 48px rgba(0,0,0,0.1);
 }
-
 .plan-card.featured {
-  border-color: var(--orange);
-  border-width: 2px;
-  box-shadow: 0 4px 24px rgba(247, 147, 26, 0.12);
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, var(--orange), var(--orange-light)) border-box;
+  box-shadow: 0 8px 32px rgba(247, 147, 26, 0.15);
 }
-
 .plan-popular {
   position: absolute;
   top: -13px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--orange);
+  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
   color: var(--white);
   font-size: 12px;
   font-weight: 700;
-  padding: 4px 16px;
+  padding: 5px 18px;
   border-radius: 100px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
 }
-
 .plan-name {
   font-size: 18px;
   font-weight: 700;
   color: var(--gray-800);
   margin-bottom: 8px;
 }
-
 .plan-price {
   display: flex;
   align-items: baseline;
   gap: 4px;
   margin-bottom: 4px;
 }
-
 .plan-price .amount {
-  font-size: 48px;
-  font-weight: 800;
+  font-size: 52px;
+  font-weight: 900;
   color: var(--gray-800);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
-
 .plan-price .period {
   font-size: 16px;
   color: var(--gray-400);
   font-weight: 500;
 }
-
 .plan-cashback {
   display: inline-flex;
   align-items: center;
@@ -678,78 +722,61 @@ button {
   border-radius: 100px;
   margin-bottom: 28px;
 }
-
-.plan-cashback svg {
-  width: 14px;
-  height: 14px;
-}
-
+.plan-cashback svg { width: 14px; height: 14px; }
 .plan-features {
   list-style: none;
   margin-bottom: 32px;
 }
-
 .plan-features li {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  padding: 11px 0;
   font-size: 15px;
   color: var(--gray-600);
   border-bottom: 1px solid var(--gray-100);
 }
-
-.plan-features li:last-child {
-  border-bottom: none;
-}
-
+.plan-features li:last-child { border-bottom: none; }
 .plan-features li svg {
   width: 18px;
   height: 18px;
   color: #22c55e;
   flex-shrink: 0;
 }
-
 .plan-btn {
   display: block;
   width: 100%;
   text-align: center;
   font-size: 16px;
   font-weight: 600;
-  padding: 14px 24px;
-  border-radius: 10px;
+  padding: 15px 24px;
+  border-radius: 12px;
   min-height: 52px;
   transition: all var(--transition);
 }
-
+.plan-btn:active { transform: scale(0.97); }
 .plan-btn-outline {
   background: var(--gray-50);
   color: var(--gray-800);
   border: 1px solid var(--gray-200);
 }
-
 .plan-btn-outline:hover {
   background: var(--gray-100);
   transform: translateY(-2px);
 }
-
 .plan-btn-primary {
   background: var(--orange);
   color: var(--white);
-  box-shadow: 0 4px 16px rgba(247, 147, 26, 0.25);
+  box-shadow: 0 4px 20px rgba(247, 147, 26, 0.25);
 }
-
 .plan-btn-primary:hover {
   background: var(--orange-dark);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(247, 147, 26, 0.35);
+  box-shadow: 0 8px 32px rgba(247, 147, 26, 0.35);
 }
 
 @media (max-width: 640px) {
-  .plans-grid {
-    grid-template-columns: 1fr;
-    max-width: 420px;
-  }
+  .plans-grid { grid-template-columns: 1fr; max-width: 420px; }
 }
 
 /* ===== WHY SECTION ===== */
@@ -758,56 +785,55 @@ button {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: 28px;
 }
-
 .why-card {
   background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: var(--radius-lg);
-  padding: 36px 32px;
-  transition: border-color var(--transition), background var(--transition);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
 }
-
 .why-card:hover {
-  border-color: rgba(247, 147, 26, 0.25);
+  border-color: rgba(247, 147, 26, 0.3);
   background: rgba(255,255,255,0.06);
+  transform: translateY(-4px);
 }
-
 .why-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   background: rgba(247, 147, 26, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  overflow: hidden;
 }
-
+.why-icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
 .why-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: var(--orange);
 }
-
 .why-card h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--white);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
-
 .why-card p {
   font-size: 15px;
   color: rgba(255,255,255,0.5);
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 @media (max-width: 640px) {
-  .why-grid {
-    grid-template-columns: 1fr;
-  }
+  .why-grid { grid-template-columns: 1fr; }
 }
 
 /* ===== FAQ ===== */
@@ -815,15 +841,8 @@ button {
   max-width: 720px;
   margin: 0 auto;
 }
-
-.faq-item {
-  border-bottom: 1px solid var(--gray-200);
-}
-
-.faq-item:first-child {
-  border-top: 1px solid var(--gray-200);
-}
-
+.faq-item { border-bottom: 1px solid var(--gray-200); }
+.faq-item:first-child { border-top: 1px solid var(--gray-200); }
 .faq-question {
   display: flex;
   align-items: center;
@@ -840,35 +859,26 @@ button {
   border: none;
   font-family: inherit;
   gap: 16px;
+  transition: color var(--transition);
 }
-
-.faq-question:hover {
-  color: var(--orange);
-}
-
+.faq-question:hover { color: var(--orange); }
 .faq-chevron {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
   color: var(--gray-400);
 }
-
 .faq-item.open .faq-chevron {
   transform: rotate(180deg);
   color: var(--orange);
 }
-
 .faq-answer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.faq-item.open .faq-answer {
-  max-height: 300px;
-}
-
+.faq-item.open .faq-answer { max-height: 300px; }
 .faq-answer-inner {
   padding-bottom: 24px;
   font-size: 15px;
@@ -878,45 +888,41 @@ button {
 
 /* ===== CTA BANNER ===== */
 .cta-banner {
-  padding: 96px 24px;
-  background: var(--navy);
+  padding: 100px 24px;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
-
-.cta-banner::before {
-  content: '';
+.cta-bg {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(247, 147, 26, 0.08) 0%, transparent 70%);
-  pointer-events: none;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
 }
-
+.cta-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 27, 42, 0.75);
+  z-index: 1;
+}
+.cta-content {
+  position: relative;
+  z-index: 2;
+}
 .cta-banner h2 {
-  font-size: clamp(28px, 4vw, 40px);
+  font-size: clamp(30px, 4.5vw, 44px);
   font-weight: 800;
   color: var(--white);
   margin-bottom: 16px;
-  position: relative;
   letter-spacing: -0.02em;
 }
-
 .cta-banner p {
   font-size: 18px;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 36px;
-  position: relative;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 40px;
 }
-
-.cta-banner .btn {
-  position: relative;
-  animation: pulse-glow 2s ease-in-out infinite;
-}
+.cta-banner .btn { animation: pulse-glow 2s ease-in-out infinite; }
 
 /* ===== FOOTER ===== */
 .footer {
@@ -924,7 +930,6 @@ button {
   padding: 48px 24px;
   border-top: 1px solid rgba(255,255,255,0.04);
 }
-
 .footer-inner {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -934,36 +939,20 @@ button {
   flex-wrap: wrap;
   gap: 24px;
 }
-
 .footer-brand {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
-.footer-brand svg {
-  width: 24px;
-  height: 24px;
-  color: var(--orange);
-}
-
-.footer-brand-text {
-  font-size: 14px;
-  color: rgba(255,255,255,0.4);
-}
-
-.footer-brand-text strong {
-  color: rgba(255,255,255,0.7);
-  font-weight: 600;
-}
-
+.footer-brand svg { width: 24px; height: 24px; color: var(--orange); }
+.footer-brand-text { font-size: 14px; color: rgba(255,255,255,0.4); }
+.footer-brand-text strong { color: rgba(255,255,255,0.7); font-weight: 600; }
 .footer-links {
   display: flex;
   align-items: center;
   gap: 32px;
   flex-wrap: wrap;
 }
-
 .footer-links a {
   font-size: 14px;
   color: rgba(255,255,255,0.4);
@@ -972,32 +961,19 @@ button {
   display: inline-flex;
   align-items: center;
 }
-
-.footer-links a:hover {
-  color: rgba(255,255,255,0.8);
-}
-
+.footer-links a:hover { color: rgba(255,255,255,0.8); }
 .footer-social a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.04);
   transition: background var(--transition);
 }
-
-.footer-social a:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.footer-social svg {
-  width: 20px;
-  height: 20px;
-  color: rgba(255,255,255,0.5);
-}
-
+.footer-social a:hover { background: rgba(255,255,255,0.1); }
+.footer-social svg { width: 20px; height: 20px; color: rgba(255,255,255,0.5); }
 .footer-bottom {
   max-width: var(--max-width);
   margin: 32px auto 0;
@@ -1009,40 +985,27 @@ button {
   flex-wrap: wrap;
   gap: 16px;
 }
-
-.footer-bottom p {
-  font-size: 13px;
-  color: rgba(255,255,255,0.25);
-}
-
+.footer-bottom p { font-size: 13px; color: rgba(255,255,255,0.25); }
 .footer-wm {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
 }
-
-.footer-wm svg {
-  width: 18px;
-  height: 18px;
-  color: rgba(255,255,255,0.3);
-}
+.footer-wm img { width: 22px; height: 22px; opacity: 0.6; }
 
 @media (max-width: 640px) {
-  .footer-inner {
-    flex-direction: column;
-    text-align: center;
-  }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .footer-links { justify-content: center; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+}
 
-  .footer-links {
-    justify-content: center;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    text-align: center;
-  }
+/* ===== FOCUS STATES ===== */
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
 }
 </style>
 </head>
@@ -1088,32 +1051,55 @@ button {
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-inner">
-    <div class="hero-badge">
-      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#F7931A"/><path d="M4 8h8M8 4v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-      The first Bitcoin-native mobile carrier
-    </div>
-
-    <h1>Your Phone Bill<br><span class="gradient-text">Earns Bitcoin.</span></h1>
-
-    <p class="hero-sub">The mobile plan that pays you back in satoshis every month. Starting at $15/mo.</p>
-
-    <div class="hero-actions">
-      <a href="dashboard.html" class="btn btn-primary">
-        Get Started
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <a href="#plans" class="btn btn-secondary">
-        See Plans
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-      </a>
-    </div>
-
-    <div class="hero-trust">
-      <p>Built on real infrastructure</p>
-      <div class="hero-trust-logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
-        Powered by World Mobile
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#F7931A"/><path d="M4 8h8M8 4v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+        The first Bitcoin-native mobile carrier
       </div>
+      <h1>Your Phone Bill<br><span class="gradient-text">Earns Bitcoin.</span></h1>
+      <p class="hero-sub">The mobile plan that pays you back in satoshis every month. Real Bitcoin, real telecom. Starting at $15/mo.</p>
+      <div class="hero-actions">
+        <a href="dashboard.html" class="btn btn-primary">
+          Get Started
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#plans" class="btn btn-secondary">
+          See Plans
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </a>
+      </div>
+      <div class="hero-trust">
+        <p>Built on real infrastructure</p>
+        <div class="hero-trust-logo">
+          <img src="img/logo.svg" alt="World Mobile">
+          Powered by World Mobile
+        </div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="img/hero-phone.png" alt="Bitcoin Agentic mobile app showing Bitcoin wallet balance" loading="eager">
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRUST BAR ===== -->
+<section class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-bar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Real Bitcoin, not points
+    </div>
+    <div class="trust-bar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      99%+ US coverage
+    </div>
+    <div class="trust-bar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
+      No contracts
+    </div>
+    <div class="trust-bar-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Privacy first
     </div>
   </div>
 </section>
@@ -1128,12 +1114,8 @@ button {
 
   <div class="steps-grid">
     <div class="step-card animate-on-scroll">
-      <div class="step-icon">
-        <!-- Phone icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-          <line x1="12" y1="18" x2="12.01" y2="18"/>
-        </svg>
+      <div class="step-image">
+        <img src="img/step-pick-plan.png" alt="Pick a mobile plan illustration" loading="lazy">
       </div>
       <div class="step-num">Step 1</div>
       <h3>Pick a plan</h3>
@@ -1141,19 +1123,8 @@ button {
     </div>
 
     <div class="step-card animate-on-scroll">
-      <div class="step-icon">
-        <!-- QR icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="2" width="8" height="8" rx="1"/>
-          <rect x="14" y="2" width="8" height="8" rx="1"/>
-          <rect x="2" y="14" width="8" height="8" rx="1"/>
-          <rect x="14" y="14" width="4" height="4" rx="0.5"/>
-          <line x1="22" y1="14" x2="22" y2="14.01"/>
-          <line x1="22" y1="22" x2="22" y2="22.01"/>
-          <line x1="18" y1="22" x2="18" y2="22.01"/>
-          <line x1="14" y1="22" x2="14" y2="22.01"/>
-          <line x1="22" y1="18" x2="22" y2="18.01"/>
-        </svg>
+      <div class="step-image">
+        <img src="img/step-activate-esim.png" alt="Activate eSIM illustration" loading="lazy">
       </div>
       <div class="step-num">Step 2</div>
       <h3>Activate your eSIM</h3>
@@ -1161,12 +1132,8 @@ button {
     </div>
 
     <div class="step-card animate-on-scroll">
-      <div class="step-icon">
-        <!-- Bitcoin arrow up icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16V8M8 12l4-4 4 4"/>
-        </svg>
+      <div class="step-image">
+        <img src="img/step-earn-bitcoin.png" alt="Earn Bitcoin illustration" loading="lazy">
       </div>
       <div class="step-num">Step 3</div>
       <h3>Earn Bitcoin every month</h3>
@@ -1175,88 +1142,83 @@ button {
   </div>
 </section>
 
-<!-- ===== PLANS ===== -->
-<section class="section section-alt" id="plans">
-  <div class="section-header animate-on-scroll">
-    <span class="section-label">Pricing</span>
-    <h2 class="section-title">Simple plans, real Bitcoin</h2>
-    <p class="section-desc">Every plan includes Bitcoin cashback. No hidden fees, no annual contracts.</p>
+<!-- ===== SOCIAL PROOF STATS ===== -->
+<section class="stats-section">
+  <div class="stats-bg" style="background-image: url('img/bitcoin-macro-bg.jpg')"></div>
+  <div class="stats-overlay">
+    <div class="stats-grid">
+      <div class="animate-on-scroll">
+        <div class="stat-number" data-target="1250000">0</div>
+        <div class="stat-label">Total sats earned by community</div>
+      </div>
+      <div class="animate-on-scroll">
+        <div class="stat-number" data-target="342">0</div>
+        <div class="stat-label">Active subscribers</div>
+      </div>
+      <div class="animate-on-scroll">
+        <div class="stat-number">99%+</div>
+        <div class="stat-label">US network coverage</div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="plans-grid">
-    <!-- Basic Plan -->
-    <div class="plan-card animate-on-scroll">
-      <div class="plan-name">Basic</div>
-      <div class="plan-price">
-        <span class="amount">$15</span>
-        <span class="period">/mo</span>
-      </div>
-      <div class="plan-cashback">
-        <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="8" opacity="0.2"/><path d="M11.2 7.1c.15-1-.6-1.55-1.65-1.9l.35-1.35-.85-.2-.35 1.35c-.2-.05-.45-.1-.7-.15l.35-1.35-.85-.2-.35 1.35c-.15-.05-.35-.1-.5-.15l-1.15-.3-.2.9s.6.15.6.15c.35.1.4.3.4.5l-.4 1.65s.05.05.05.05h-.05l-.6 2.35c-.05.1-.15.25-.4.2 0 0-.6-.15-.6-.15l-.4.95 1.1.3c.2.05.4.1.6.15l-.35 1.4.85.2.35-1.35c.25.05.45.1.7.15l-.35 1.35.85.2.35-1.4c1.45.25 2.5.15 2.95-1.15.35-1.05 0-1.65-.75-2.05.55-.15.95-.5 1.05-1.25zm-1.9 2.65c-.25 1.05-2 .5-2.55.35l.45-1.85c.6.15 2.35.45 2.1 1.5zm.25-2.7c-.25.95-1.7.45-2.15.35l.4-1.7c.5.1 2 .35 1.75 1.35z"/></svg>
-        5% cashback &middot; ~7,692 sats/mo
-      </div>
-      <ul class="plan-features">
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          5 GB high-speed data
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Unlimited calls &amp; texts
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Bitcoin cashback every month
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          eSIM activation
-        </li>
-      </ul>
-      <a href="dashboard.html" class="plan-btn plan-btn-outline">Get Started</a>
+<!-- ===== PLANS ===== -->
+<section class="section section-alt plans-wrapper" id="plans">
+  <div class="plans-bg" style="background-image: url('img/plans-lifestyle-bg.jpg')"></div>
+  <div class="plans-content">
+    <div class="section-header animate-on-scroll">
+      <span class="section-label">Pricing</span>
+      <h2 class="section-title">Simple plans, real Bitcoin</h2>
+      <p class="section-desc">Every plan includes Bitcoin cashback. No hidden fees, no annual contracts.</p>
     </div>
 
-    <!-- Pro Plan -->
-    <div class="plan-card featured animate-on-scroll">
-      <div class="plan-popular">Most Popular</div>
-      <div class="plan-name">Pro</div>
-      <div class="plan-price">
-        <span class="amount">$30</span>
-        <span class="period">/mo</span>
+    <div class="plans-grid">
+      <div class="plan-card animate-on-scroll">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">
+          <span class="amount">$15</span>
+          <span class="period">/mo</span>
+        </div>
+        <div class="plan-cashback">
+          <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="8" opacity="0.2"/><path d="M11.2 7.1c.15-1-.6-1.55-1.65-1.9l.35-1.35-.85-.2-.35 1.35c-.2-.05-.45-.1-.7-.15l.35-1.35-.85-.2-.35 1.35c-.15-.05-.35-.1-.5-.15l-1.15-.3-.2.9s.6.15.6.15c.35.1.4.3.4.5l-.4 1.65s.05.05.05.05h-.05l-.6 2.35c-.05.1-.15.25-.4.2 0 0-.6-.15-.6-.15l-.4.95 1.1.3c.2.05.4.1.6.15l-.35 1.4.85.2.35-1.35c.25.05.45.1.7.15l-.35 1.35.85.2.35-1.4c1.45.25 2.5.15 2.95-1.15.35-1.05 0-1.65-.75-2.05.55-.15.95-.5 1.05-1.25zm-1.9 2.65c-.25 1.05-2 .5-2.55.35l.45-1.85c.6.15 2.35.45 2.1 1.5zm.25-2.7c-.25.95-1.7.45-2.15.35l.4-1.7c.5.1 2 .35 1.75 1.35z"/></svg>
+          5% cashback &middot; ~7,692 sats/mo
+        </div>
+        <ul class="plan-features">
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>5 GB high-speed data</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited calls &amp; texts</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Bitcoin cashback every month</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>eSIM activation</li>
+        </ul>
+        <a href="dashboard.html" class="plan-btn plan-btn-outline">Get Started</a>
       </div>
-      <div class="plan-cashback">
-        <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="8" opacity="0.2"/><path d="M11.2 7.1c.15-1-.6-1.55-1.65-1.9l.35-1.35-.85-.2-.35 1.35c-.2-.05-.45-.1-.7-.15l.35-1.35-.85-.2-.35 1.35c-.15-.05-.35-.1-.5-.15l-1.15-.3-.2.9s.6.15.6.15c.35.1.4.3.4.5l-.4 1.65s.05.05.05.05h-.05l-.6 2.35c-.05.1-.15.25-.4.2 0 0-.6-.15-.6-.15l-.4.95 1.1.3c.2.05.4.1.6.15l-.35 1.4.85.2.35-1.35c.25.05.45.1.7.15l-.35 1.35.85.2.35-1.4c1.45.25 2.5.15 2.95-1.15.35-1.05 0-1.65-.75-2.05.55-.15.95-.5 1.05-1.25zm-1.9 2.65c-.25 1.05-2 .5-2.55.35l.45-1.85c.6.15 2.35.45 2.1 1.5zm.25-2.7c-.25.95-1.7.45-2.15.35l.4-1.7c.5.1 2 .35 1.75 1.35z"/></svg>
-        10% cashback &middot; ~30,769 sats/mo
+
+      <div class="plan-card featured animate-on-scroll">
+        <div class="plan-popular">Most Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">
+          <span class="amount">$30</span>
+          <span class="period">/mo</span>
+        </div>
+        <div class="plan-cashback">
+          <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="8" opacity="0.2"/><path d="M11.2 7.1c.15-1-.6-1.55-1.65-1.9l.35-1.35-.85-.2-.35 1.35c-.2-.05-.45-.1-.7-.15l.35-1.35-.85-.2-.35 1.35c-.15-.05-.35-.1-.5-.15l-1.15-.3-.2.9s.6.15.6.15c.35.1.4.3.4.5l-.4 1.65s.05.05.05.05h-.05l-.6 2.35c-.05.1-.15.25-.4.2 0 0-.6-.15-.6-.15l-.4.95 1.1.3c.2.05.4.1.6.15l-.35 1.4.85.2.35-1.35c.25.05.45.1.7.15l-.35 1.35.85.2.35-1.4c1.45.25 2.5.15 2.95-1.15.35-1.05 0-1.65-.75-2.05.55-.15.95-.5 1.05-1.25zm-1.9 2.65c-.25 1.05-2 .5-2.55.35l.45-1.85c.6.15 2.35.45 2.1 1.5zm.25-2.7c-.25.95-1.7.45-2.15.35l.4-1.7c.5.1 2 .35 1.75 1.35z"/></svg>
+          10% cashback &middot; ~30,769 sats/mo
+        </div>
+        <ul class="plan-features">
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>25 GB high-speed data</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited calls &amp; texts</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Bitcoin cashback every month</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>eSIM activation</li>
+          <li><svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support</li>
+        </ul>
+        <a href="dashboard.html" class="plan-btn plan-btn-primary">Get Started</a>
       </div>
-      <ul class="plan-features">
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          25 GB high-speed data
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Unlimited calls &amp; texts
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Bitcoin cashback every month
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          eSIM activation
-        </li>
-        <li>
-          <svg viewBox="0 0 18 18" fill="none"><path d="M15 4.5L6.75 12.75 3 9" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Priority support
-        </li>
-      </ul>
-      <a href="dashboard.html" class="plan-btn plan-btn-primary">Get Started</a>
     </div>
   </div>
 </section>
 
 <!-- ===== WHY BITCOIN MOBILE ===== -->
-<section class="section section-dark" id="why">
+<section class="section section-dark section-spacious" id="why">
   <div class="section-header animate-on-scroll">
     <span class="section-label">Why Bitcoin Mobile</span>
     <h2 class="section-title" style="color: var(--white);">Built different, on purpose</h2>
@@ -1266,16 +1228,7 @@ button {
   <div class="why-grid">
     <div class="why-card animate-on-scroll">
       <div class="why-icon">
-        <!-- Bitcoin icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M9 8h4a2 2 0 010 4H9V8z"/>
-          <path d="M9 12h5a2 2 0 010 4H9v-4z"/>
-          <line x1="11" y1="6" x2="11" y2="8"/>
-          <line x1="13" y1="6" x2="13" y2="8"/>
-          <line x1="11" y1="16" x2="11" y2="18"/>
-          <line x1="13" y1="16" x2="13" y2="18"/>
-        </svg>
+        <img src="img/icon-real-bitcoin.svg" alt="Bitcoin icon" onerror="this.style.display='none';this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><path d=\'M9 8h4a2 2 0 010 4H9V8z\'/><path d=\'M9 12h5a2 2 0 010 4H9v-4z\'/></svg>'">
       </div>
       <h3>Real Bitcoin, not points</h3>
       <p>Satoshis deposited to your wallet every billing cycle. Real Bitcoin you own and control, not loyalty points that expire.</p>
@@ -1283,11 +1236,7 @@ button {
 
     <div class="why-card animate-on-scroll">
       <div class="why-icon">
-        <!-- Calendar/freedom icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-          <path d="M9 12l2 2 4-4"/>
-        </svg>
+        <img src="img/icon-no-contracts.svg" alt="No contracts icon" onerror="this.style.display='none';this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z\'/><path d=\'M9 12l2 2 4-4\'/></svg>'">
       </div>
       <h3>No contracts, cancel anytime</h3>
       <p>Month-to-month billing with zero cancellation fees. Stay because you want to, not because you have to.</p>
@@ -1295,11 +1244,7 @@ button {
 
     <div class="why-card animate-on-scroll">
       <div class="why-icon">
-        <!-- Shield/privacy icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="M12 8v4M12 16h.01"/>
-        </svg>
+        <img src="img/icon-privacy.svg" alt="Privacy icon" onerror="this.style.display='none';this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\'/><path d=\'M12 8v4M12 16h.01\'/></svg>'">
       </div>
       <h3>Privacy included</h3>
       <p>All traffic encrypted by default. No selling your browsing data to advertisers. Your data is yours.</p>
@@ -1307,12 +1252,7 @@ button {
 
     <div class="why-card animate-on-scroll">
       <div class="why-icon">
-        <!-- Globe/infrastructure icon -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M2 12h20"/>
-          <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/>
-        </svg>
+        <img src="img/icon-world-mobile.svg" alt="World Mobile icon" onerror="this.style.display='none';this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><path d=\'M2 12h20\'/><path d=\'M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z\'/></svg>'">
       </div>
       <h3>Powered by World Mobile</h3>
       <p>Real telecom infrastructure, not a reseller experiment. World Mobile operates networks across multiple countries.</p>
@@ -1335,57 +1275,43 @@ button {
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-answer">
-        <div class="faq-answer-inner">
-          A percentage of your monthly bill is converted to Bitcoin (satoshis) and deposited into your Bitcoin Agentic wallet at the start of each billing cycle. For the Basic plan, that is 5% back (~7,692 sats/mo). For the Pro plan, it is 10% back (~30,769 sats/mo). The exact sat amount varies with the current BTC/USD exchange rate.
-        </div>
+        <div class="faq-answer-inner">A percentage of your monthly bill is converted to Bitcoin (satoshis) and deposited into your Bitcoin Agentic wallet at the start of each billing cycle. For the Basic plan, that is 5% back (~7,692 sats/mo). For the Pro plan, it is 10% back (~30,769 sats/mo). The exact sat amount varies with the current BTC/USD exchange rate.</div>
       </div>
     </div>
-
     <div class="faq-item animate-on-scroll">
       <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
         Can I keep my current phone number?
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-answer">
-        <div class="faq-answer-inner">
-          Yes. We support number porting from all major US carriers. During signup, you will have the option to transfer your existing number. The process typically takes 1-2 business days, and your current service remains active until the port completes.
-        </div>
+        <div class="faq-answer-inner">Yes. We support number porting from all major US carriers. During signup, you will have the option to transfer your existing number. The process typically takes 1-2 business days, and your current service remains active until the port completes.</div>
       </div>
     </div>
-
     <div class="faq-item animate-on-scroll">
       <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
         What phones are compatible?
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-answer">
-        <div class="faq-answer-inner">
-          Any eSIM-compatible device works with Bitcoin Agentic. This includes iPhone XS and later, Google Pixel 3a and later, Samsung Galaxy S20 and later, and most recent flagship Android phones. Check your device settings for "eSIM" or "Add Cellular Plan" to confirm compatibility.
-        </div>
+        <div class="faq-answer-inner">Any eSIM-compatible device works with Bitcoin Agentic. This includes iPhone XS and later, Google Pixel 3a and later, Samsung Galaxy S20 and later, and most recent flagship Android phones. Check your device settings for "eSIM" or "Add Cellular Plan" to confirm compatibility.</div>
       </div>
     </div>
-
     <div class="faq-item animate-on-scroll">
       <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
         How do I withdraw my Bitcoin?
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-answer">
-        <div class="faq-answer-inner">
-          From your dashboard, you can withdraw your accumulated satoshis to any Bitcoin wallet address or Lightning address. There is no minimum withdrawal amount for Lightning withdrawals. On-chain withdrawals have a small network fee that varies with Bitcoin network congestion.
-        </div>
+        <div class="faq-answer-inner">From your dashboard, you can withdraw your accumulated satoshis to any Bitcoin wallet address or Lightning address. There is no minimum withdrawal amount for Lightning withdrawals. On-chain withdrawals have a small network fee that varies with Bitcoin network congestion.</div>
       </div>
     </div>
-
     <div class="faq-item animate-on-scroll">
       <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
         What network does Bitcoin Agentic use?
         <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-answer">
-        <div class="faq-answer-inner">
-          Bitcoin Agentic is powered by World Mobile, a decentralized telecom operator with infrastructure in multiple countries. In the US, service is delivered over established nationwide networks. Coverage includes 99%+ of the US population with 5G and LTE.
-        </div>
+        <div class="faq-answer-inner">Bitcoin Agentic is powered by World Mobile, a decentralized telecom operator with infrastructure in multiple countries. In the US, service is delivered over established nationwide networks. Coverage includes 99%+ of the US population with 5G and LTE.</div>
       </div>
     </div>
   </div>
@@ -1393,12 +1319,16 @@ button {
 
 <!-- ===== CTA BANNER ===== -->
 <section class="cta-banner">
-  <h2>Start earning Bitcoin today</h2>
-  <p>Plans start at $15/mo. No contracts. Cancel anytime.</p>
-  <a href="dashboard.html" class="btn btn-primary">
-    Get Started
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </a>
+  <div class="cta-bg" style="background-image: url('img/cta-network-bg.jpg')"></div>
+  <div class="cta-overlay"></div>
+  <div class="cta-content">
+    <h2>Start earning Bitcoin today</h2>
+    <p>Plans start at $15/mo. No contracts. Cancel anytime.</p>
+    <a href="dashboard.html" class="btn btn-primary">
+      Get Started
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
 </section>
 
 <!-- ===== FOOTER ===== -->
@@ -1413,13 +1343,11 @@ button {
         <strong>Bitcoin Agentic</strong>
       </div>
     </div>
-
     <div class="footer-links">
       <a href="#">Terms</a>
       <a href="#">Privacy</a>
       <a href="#">Support</a>
     </div>
-
     <div class="footer-social">
       <a href="https://x.com/bitcoinagentic" target="_blank" rel="noopener noreferrer" aria-label="Follow on X (Twitter)">
         <svg viewBox="0 0 24 24" fill="currentColor">
@@ -1428,42 +1356,67 @@ button {
       </a>
     </div>
   </div>
-
   <div class="footer-bottom">
     <p>&copy; 2026 Bitcoin Agentic. All rights reserved.</p>
     <div class="footer-wm">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+      <img src="img/logo.svg" alt="World Mobile">
       A World Mobile Product
     </div>
   </div>
 </footer>
 
-<!-- ===== SCROLL ANIMATION SCRIPT ===== -->
+<!-- ===== SCRIPTS ===== -->
 <script>
-  // Intersection Observer for scroll animations
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.1,
-      rootMargin: '0px 0px -40px 0px',
-    }
-  );
+// Intersection Observer for scroll animations
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+);
+document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
 
-  document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-    observer.observe(el);
-  });
+// Stagger animations
+document.querySelectorAll('.steps-grid .step-card, .why-grid .why-card, .plans-grid .plan-card, .faq-list .faq-item').forEach((el, i) => {
+  el.style.transitionDelay = `${i * 0.1}s`;
+});
 
-  // Stagger animations for grid children
-  document.querySelectorAll('.steps-grid .step-card, .why-grid .why-card, .plans-grid .plan-card, .faq-list .faq-item').forEach((el, i) => {
-    el.style.transitionDelay = `${i * 0.08}s`;
-  });
+// Animated counter for stats
+function animateCounter(el) {
+  const target = parseInt(el.getAttribute('data-target'));
+  if (!target) return;
+  const duration = 2000;
+  const start = performance.now();
+  const format = (n) => n >= 1000000 ? (n/1000000).toFixed(1) + 'M' : n >= 1000 ? (n/1000).toFixed(0) + 'K' : n.toString();
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+    el.textContent = format(current);
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = format(target);
+  }
+  requestAnimationFrame(update);
+}
+
+const statsObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('[data-target]').forEach(animateCounter);
+        statsObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.3 }
+);
+document.querySelectorAll('.stats-grid').forEach((el) => statsObserver.observe(el));
 </script>
 
 </body>
